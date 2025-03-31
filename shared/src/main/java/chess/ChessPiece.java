@@ -63,6 +63,9 @@ public class ChessPiece {
             case KNIGHT:
                 moveCal = new KnightCalculator();
                 break;
+            case KING:
+                moveCal = new KingCalculator();
+                break;
             default:
                 return null;
         }
