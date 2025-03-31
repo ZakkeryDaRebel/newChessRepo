@@ -60,6 +60,9 @@ public class ChessPiece {
             case PAWN:
                 moveCal = new PawnCalculator();
                 break;
+            case KNIGHT:
+                moveCal = new KnightCalculator();
+                break;
             default:
                 return null;
         }
