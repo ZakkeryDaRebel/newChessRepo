@@ -72,6 +72,9 @@ public class ChessPiece {
             case BISHOP:
                 moveCal = new BishopCalculator();
                 break;
+            case QUEEN:
+                moveCal = new QueenCalculator();
+                break;
             default:
                 return null;
         }
