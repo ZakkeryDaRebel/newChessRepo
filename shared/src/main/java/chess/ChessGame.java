@@ -67,6 +67,20 @@ public class ChessGame {
         Collection<ChessMove> validMoves = new ArrayList<>();
 
         //Loop through possibleMoves and check to see if the king is in check
+        for (ChessMove move : possibleMoves) {
+            ChessGame testGame = new ChessGame();
+            ChessBoard oldBoard = board.clone();
+            if (oldBoard == null) {
+                System.out.println("FAIL to clone, returning null");
+                return null;
+            }
+            testGame.setBoard(oldBoard);
+            TeamColor color = board.getPiece(startPosition).getTeamColor();
+            testGame.executeMove(move);
+            if (!testGame.isInCheck(color)) {
+                validMoves.add(move);
+            }
+        }
 
         return validMoves;
     }
@@ -82,13 +96,17 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
 
+        executeMove(move);
+    }
+
+    public void executeMove(ChessMove move) {
         ChessPiece oldPiece = board.getPiece(move.getStartPosition());
         //Remove the piece from the start position
         board.addPiece(move.getStartPosition(), null);
         //If the piece doesn't promote, put the same piece at the end position
         if (move.getPromotionPiece() == null) {
             board.addPiece(move.getEndPosition(), oldPiece);
-        //Otherwise, but the new promotion type at the end position
+            //Otherwise, but the new promotion type at the end position
         } else {
             board.addPiece(move.getEndPosition(), new ChessPiece(oldPiece.getTeamColor(), move.getPromotionPiece()));
         }
@@ -110,7 +128,7 @@ public class ChessGame {
             for (int col = 1; col < 9; col++) {
                 ChessPiece piece = board.getPiece(new ChessPosition(row, col));
                 if (piece != null && piece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> pieceMoves = validMoves(new ChessPosition(row, col));
+                    Collection<ChessMove> pieceMoves = piece.pieceMoves(board, new ChessPosition(row, col));
                     for (ChessMove attack : pieceMoves) {
                         if (attack.getEndPosition().equals(kingPosition)) {
                             return true;
@@ -181,7 +199,8 @@ public class ChessGame {
         for (int row = 1; row < 9; row++) {
             for (int col = 1; col < 9; col++) {
                 ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == color) {
+                if (piece != null &&
+                        piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == color) {
                     return new ChessPosition(row, col);
                 }
             }
