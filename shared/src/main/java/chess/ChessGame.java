@@ -96,7 +96,17 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
 
+        if(board.getPiece(move.getStartPosition()).getTeamColor() != teamTurn) {
+            throw new InvalidMoveException();
+        }
+
         executeMove(move);
+
+        if (teamTurn == TeamColor.WHITE) {
+            teamTurn = TeamColor.BLACK;
+        } else {
+            teamTurn = TeamColor.WHITE;
+        }
     }
 
     public void executeMove(ChessMove move) {
