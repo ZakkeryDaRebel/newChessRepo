@@ -1,5 +1,8 @@
 package chess;
 
+import chess.movecalculators.PawnCalculator;
+import com.sun.source.tree.WhileLoopTree;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -13,11 +16,13 @@ public class ChessGame {
 
     TeamColor teamTurn;
     ChessBoard board;
+    ChessMove lastMove;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
+        lastMove = null;
     }
 
     /**
@@ -82,7 +87,56 @@ public class ChessGame {
             }
         }
 
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            checkEnPassant(startPosition, validMoves);
+        } else if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            checkCastling(startPosition, validMoves);
+        }
+        //Check EnPassant
+        //Check Castling
+
         return validMoves;
+    }
+
+    public void checkEnPassant(ChessPosition startPosition, Collection<ChessMove> validMoves) {
+        if (lastMove == null) {
+            return;
+        }
+
+        //check if lastMove was a pawn that moved from 2->4 or 7->5
+        ChessPiece lastMovePiece = board.getPiece(lastMove.getEndPosition());
+        if (lastMovePiece.getPieceType() != ChessPiece.PieceType.PAWN) {
+            return;
+        }
+
+        if (lastMovePiece.getTeamColor() == ChessGame.TeamColor.WHITE)  {
+            if (lastMove.getStartPosition().getRow() == 2 && lastMove.getEndPosition().getRow() == 4) {
+                if (startPosition.getRow() == 4) {
+                    if (enPassantOneColumnOver(startPosition, lastMove.getEndPosition())) {
+                        ChessPosition enPassant = new ChessPosition(3, lastMove.getEndPosition().getColumn());
+                        validMoves.add(new ChessMove(startPosition, enPassant, null));
+                    }
+                }
+            }
+        } else {
+            if (lastMove.getStartPosition().getRow() == 7 && lastMove.getEndPosition().getRow() == 5) {
+                if (startPosition.getRow() == 5) {
+                    if (enPassantOneColumnOver(startPosition, lastMove.getEndPosition())) {
+                        ChessPosition enPassant = new ChessPosition(6, lastMove.getEndPosition().getColumn());
+                        validMoves.add(new ChessMove(startPosition, enPassant, null));
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean enPassantOneColumnOver(ChessPosition startPosition, ChessPosition lastMoveEnd) {
+        int lastMoveCol = lastMoveEnd.getColumn();
+        return startPosition.getColumn() == lastMoveCol + 1 || startPosition.getColumn() == lastMoveCol - 1;
+    }
+
+    public void checkCastling(ChessPosition startPosition, Collection<ChessMove> validMoves) {
+
     }
 
     /**
@@ -100,13 +154,33 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
 
+        //If EnPassant
+        if (board.getPiece(move.getStartPosition()).getPieceType() == ChessPiece.PieceType.PAWN) {
+            if (isEnPassantMove(move)) {
+                ChessPosition capturedPiece = new ChessPosition(move.getStartPosition().getRow(),
+                        move.getEndPosition().getColumn());
+                board.addPiece(capturedPiece, null);
+            }
+        }
+
         executeMove(move);
+        //If EnPassant or Castling, also need to remove other pawn or move rook
+        lastMove = move;
 
         if (teamTurn == TeamColor.WHITE) {
             teamTurn = TeamColor.BLACK;
         } else {
             teamTurn = TeamColor.WHITE;
         }
+    }
+
+    public boolean isEnPassantMove(ChessMove move) {
+        //check to see if moving diagonally
+        if (move.getStartPosition().getColumn() != move.getEndPosition().getColumn()) {
+            //If there is a piece there, it is a normal move, otherwise it is enPassant
+            return board.getPiece(move.getEndPosition()) == null;
+        }
+        return false;
     }
 
     public void executeMove(ChessMove move) {
