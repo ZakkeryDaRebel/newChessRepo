@@ -2,6 +2,8 @@ package chess.extracreditcalculators;
 
 import chess.*;
 
+import java.util.Collection;
+
 public class CastleCalculator {
 
     Boolean[] whiteCastling;
@@ -22,12 +24,61 @@ public class CastleCalculator {
         }
     }
 
-    public Boolean[] getWhiteCastleBool() {
-        return whiteCastling;
+    public void checkCastling(ChessBoard board, ChessPosition startPos, Collection<ChessMove> validMoves) {
+        ChessGame.TeamColor color = board.getPiece(startPos).getTeamColor();
+        Boolean[] castling;
+        if (color == ChessGame.TeamColor.WHITE) {
+            castling = whiteCastling;
+        } else {
+            castling = blackCastling;
+        }
+
+        //If king has moved or if the king is in check, then can't castle
+        if (!castling[1]) {
+            return;
+        }
+
+        //If a rook hasn't moved.
+        if (castling[0] && checkCastleQueen(board, startPos, color)) {
+            validMoves.add(new ChessMove(startPos, new ChessPosition(startPos.getRow(), 3), null));
+        }
+
+        //If h rook hasn't moved.
+        if (castling[2] && checkCastleKing(board, startPos, color)) {
+            validMoves.add(new ChessMove(startPos, new ChessPosition(startPos.getRow(), 7), null));
+        }
     }
 
-    public Boolean[] getBlackCastleBool() {
-        return blackCastling;
+    public boolean checkCastleQueen(ChessBoard board, ChessPosition startPos, ChessGame.TeamColor color) {
+        ChessPosition bSpot = new ChessPosition(startPos.getRow(), 2);
+        ChessPiece bPiece = board.getPiece(bSpot);
+        ChessPosition cSpot = new ChessPosition(startPos.getRow(), 3);
+        ChessPiece cPiece = board.getPiece(cSpot);
+        ChessPosition dSpot = new ChessPosition(startPos.getRow(), 4);
+        ChessPiece dPiece = board.getPiece(dSpot);
+
+        //No pieces between rook and king.
+        if (bPiece != null || cPiece != null || dPiece != null) {
+            return false;
+        }
+
+        //Make sure the king won't be attacked on b, c, or d column.
+        return !canAttackKing(board, color, cSpot) && !canAttackKing(board, color, dSpot);
+    }
+
+    public boolean checkCastleKing(ChessBoard board, ChessPosition startPos, ChessGame.TeamColor color) {
+        ChessPosition fSpot = new ChessPosition(startPos.getRow(), 6);
+        ChessPiece fPiece = board.getPiece(fSpot);
+        ChessPosition gSpot = new ChessPosition(startPos.getRow(), 7);
+        ChessPiece gPiece = board.getPiece(gSpot);
+
+        //No pieces between rook and king.
+        if (fPiece != null || gPiece != null) {
+            return false;
+        }
+
+        //Make sure the king won't be attacked on f or g column.
+        return !canAttackKing(board, color, fSpot) && !canAttackKing(board, color, gSpot);
     }
 
     public void loadBoard(ChessBoard newBoard) {
@@ -75,6 +126,23 @@ public class CastleCalculator {
             //If the king tries to move 2 spaces to the right or left, it's a castling move
             return move.getStartPosition().getColumn() == move.getEndPosition().getColumn() - 2 ||
                     move.getStartPosition().getColumn() == move.getEndPosition().getColumn() + 2;
+        }
+        return false;
+    }
+
+    public boolean canAttackKing(ChessBoard board, ChessGame.TeamColor teamColor, ChessPosition kingPosition) {
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                if (piece != null && piece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> pieceMoves = piece.pieceMoves(board, new ChessPosition(row, col));
+                    for (ChessMove attack : pieceMoves) {
+                        if (attack.getEndPosition().equals(kingPosition)) {
+                            return true;
+                        }
+                    }
+                }
+            }
         }
         return false;
     }

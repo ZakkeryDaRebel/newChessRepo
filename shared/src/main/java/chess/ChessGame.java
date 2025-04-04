@@ -74,6 +74,7 @@ public class ChessGame {
         //Get all the pieceMoves to go through and check
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
+        TeamColor color = board.getPiece(startPosition).getTeamColor();
 
         //Loop through possibleMoves and check to see if the king is in check after executing a move
         for (ChessMove move : possibleMoves) {
@@ -84,7 +85,6 @@ public class ChessGame {
                 return null;
             }
             testGame.setBoard(testBoard);
-            TeamColor color = board.getPiece(startPosition).getTeamColor();
             testGame.executeMove(move);
             if (!testGame.isInCheck(color)) {
                 validMoves.add(move);
@@ -93,76 +93,11 @@ public class ChessGame {
 
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             enPassantCal.checkEnPassant(board, startPosition, validMoves);
-        } else if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-            checkCastling(startPosition, validMoves);
+        } else if (piece.getPieceType() == ChessPiece.PieceType.KING && !isInCheck(color)) {
+            castleCal.checkCastling(board, startPosition, validMoves);
         }
 
         return validMoves;
-    }
-
-    public void checkCastling(ChessPosition startPosition, Collection<ChessMove> validMoves) {
-        ChessGame.TeamColor color = board.getPiece(startPosition).getTeamColor();
-        Boolean[] castling;
-        if (color == TeamColor.WHITE) {
-            castling = castleCal.getWhiteCastleBool();
-        } else {
-            castling = castleCal.getBlackCastleBool();
-        }
-
-        //If king has moved or if the king is in check, then can't castle
-        if (!castling[1] || isInCheck(color)) {
-            return;
-        }
-
-        boolean canCastle = true;
-
-        //If a rook hasn't moved.
-        if (castling[0]) {
-            ChessPosition bSpot = new ChessPosition(startPosition.getRow(), 2);
-            ChessPiece bPiece = board.getPiece(bSpot);
-            ChessPosition cSpot = new ChessPosition(startPosition.getRow(), 3);
-            ChessPiece cPiece = board.getPiece(cSpot);
-            ChessPosition dSpot = new ChessPosition(startPosition.getRow(), 4);
-            ChessPiece dPiece = board.getPiece(dSpot);
-
-            //No pieces between rook and king.
-            if (bPiece != null || cPiece != null || dPiece != null) {
-                canCastle = false;
-            }
-
-            //Make sure the king won't be attacked on b, c, or d column.
-            if (canAttackKing(color, cSpot) || canAttackKing(color, dSpot)) {
-                canCastle = false;
-            }
-
-            if (canCastle) {
-                validMoves.add(new ChessMove(startPosition, cSpot, null));
-            }
-        }
-
-        canCastle = true;
-
-        //If h rook hasn't moved.
-        if (castling[2]) {
-            ChessPosition fSpot = new ChessPosition(startPosition.getRow(), 6);
-            ChessPiece fPiece = board.getPiece(fSpot);
-            ChessPosition gSpot = new ChessPosition(startPosition.getRow(), 7);
-            ChessPiece gPiece = board.getPiece(gSpot);
-
-            //No pieces between rook and king.
-            if (fPiece != null || gPiece != null) {
-                canCastle = false;
-            }
-
-            //Make sure the king won't be attacked on f or g column.
-            if (canAttackKing(color, fSpot) || canAttackKing(color, gSpot)) {
-                canCastle = false;
-            }
-
-            if (canCastle) {
-                validMoves.add(new ChessMove(startPosition, gSpot, null));
-            }
-        }
     }
 
     /**
@@ -272,25 +207,10 @@ public class ChessGame {
             //If you can't find the king, then the king can't be in check
             return false;
         }
-        return canAttackKing(teamColor, kingPosition);
+        return castleCal.canAttackKing(board, teamColor, kingPosition);
     }
 
-    public boolean canAttackKing(TeamColor teamColor, ChessPosition kingPosition) {
-        for (int row = 1; row < 9; row++) {
-            for (int col = 1; col < 9; col++) {
-                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                if (piece != null && piece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> pieceMoves = piece.pieceMoves(board, new ChessPosition(row, col));
-                    for (ChessMove attack : pieceMoves) {
-                        if (attack.getEndPosition().equals(kingPosition)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
+
 
     /**
      * Determines if the given team is in checkmate
