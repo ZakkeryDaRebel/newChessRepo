@@ -1,7 +1,6 @@
 package chess;
 
-import chess.movecalculators.PawnCalculator;
-import com.sun.source.tree.WhileLoopTree;
+import chess.movecalculators.EnPassantCalculator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,15 +15,16 @@ public class ChessGame {
 
     TeamColor teamTurn;
     ChessBoard board;
-    ChessMove lastMove;
     Boolean[] whiteCastling;
     Boolean[] blackCastling;
+    EnPassantCalculator enPassantCalculator;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
-        lastMove = null;
+        enPassantCalculator = new EnPassantCalculator();
+
         //whiteCastling and blackCastling stores if the pieces for castling haven't moved
         whiteCastling = new Boolean[]{true, true, true};
         blackCastling = new Boolean[]{true, true, true};
@@ -67,25 +67,27 @@ public class ChessGame {
         if (startPosition.getRow() < 1 || startPosition.getRow() > 8 ||
                 startPosition.getColumn() < 1 || startPosition.getColumn() > 8) {
             return null;
-        //Check if there is no piece at position
         }
 
+        //Check if there is no piece at position
         ChessPiece piece = board.getPiece(startPosition);
         if (piece == null) {
             return null;
         }
+
+        //Get all of the pieceMoves to go through
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
 
         //Loop through possibleMoves and check to see if the king is in check
         for (ChessMove move : possibleMoves) {
             ChessGame testGame = new ChessGame();
-            ChessBoard oldBoard = board.clone();
-            if (oldBoard == null) {
+            ChessBoard testBoard = board.clone();
+            if (testBoard == null) {
                 System.out.println("FAIL to clone, returning null");
                 return null;
             }
-            testGame.setBoard(oldBoard);
+            testGame.setBoard(testBoard);
             TeamColor color = board.getPiece(startPosition).getTeamColor();
             testGame.executeMove(move);
             if (!testGame.isInCheck(color)) {
@@ -94,49 +96,12 @@ public class ChessGame {
         }
 
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            checkEnPassant(startPosition, validMoves);
+            enPassantCalculator.checkEnPassant(board, startPosition, validMoves);
         } else if (piece.getPieceType() == ChessPiece.PieceType.KING) {
             checkCastling(startPosition, validMoves);
         }
 
         return validMoves;
-    }
-
-    public void checkEnPassant(ChessPosition startPosition, Collection<ChessMove> validMoves) {
-        if (lastMove == null) {
-            return;
-        }
-
-        //check if lastMove was a pawn that moved from 2->4 or 7->5
-        ChessPiece lastMovePiece = board.getPiece(lastMove.getEndPosition());
-        if (lastMovePiece.getPieceType() != ChessPiece.PieceType.PAWN) {
-            return;
-        }
-
-        if (lastMovePiece.getTeamColor() == ChessGame.TeamColor.WHITE)  {
-            if (lastMove.getStartPosition().getRow() == 2 && lastMove.getEndPosition().getRow() == 4) {
-                if (startPosition.getRow() == 4) {
-                    if (enPassantOneColumnOver(startPosition, lastMove.getEndPosition())) {
-                        ChessPosition enPassant = new ChessPosition(3, lastMove.getEndPosition().getColumn());
-                        validMoves.add(new ChessMove(startPosition, enPassant, null));
-                    }
-                }
-            }
-        } else {
-            if (lastMove.getStartPosition().getRow() == 7 && lastMove.getEndPosition().getRow() == 5) {
-                if (startPosition.getRow() == 5) {
-                    if (enPassantOneColumnOver(startPosition, lastMove.getEndPosition())) {
-                        ChessPosition enPassant = new ChessPosition(6, lastMove.getEndPosition().getColumn());
-                        validMoves.add(new ChessMove(startPosition, enPassant, null));
-                    }
-                }
-            }
-        }
-    }
-
-    public boolean enPassantOneColumnOver(ChessPosition startPosition, ChessPosition lastMoveEnd) {
-        int lastMoveCol = lastMoveEnd.getColumn();
-        return startPosition.getColumn() == lastMoveCol + 1 || startPosition.getColumn() == lastMoveCol - 1;
     }
 
     public void checkCastling(ChessPosition startPosition, Collection<ChessMove> validMoves) {
@@ -225,11 +190,13 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
 
+        ChessPosition startPos = move.getStartPosition();
+        ChessPosition endPos = move.getEndPosition();
+
         //If EnPassant
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            if (isEnPassantMove(move)) {
-                ChessPosition capturedPiece = new ChessPosition(move.getStartPosition().getRow(),
-                        move.getEndPosition().getColumn());
+            if (enPassantCalculator.isEnPassantMove(board, move)) {
+                ChessPosition capturedPiece = new ChessPosition(startPos.getRow(), endPos.getColumn());
                 //Remove piece that got en passant ed
                 board.addPiece(capturedPiece, null);
             }
@@ -239,13 +206,13 @@ public class ChessGame {
         if (piece.getPieceType() == ChessPiece.PieceType.KING) {
             if (isCastlingMove(move)) {
                 //Move rook that castled
-                if (move.getEndPosition().getColumn() == 7) {
-                    ChessPosition castleStart = new ChessPosition(move.getStartPosition().getRow(), 8);
-                    ChessPosition castleEnd = new ChessPosition(move.getStartPosition().getRow(), 6);
+                if (endPos.getColumn() == 7) {
+                    ChessPosition castleStart = new ChessPosition(startPos.getRow(), 8);
+                    ChessPosition castleEnd = new ChessPosition(startPos.getRow(), 6);
                     executeMove(new ChessMove(castleStart, castleEnd, null));
-                } else if (move.getEndPosition().getColumn() == 3) {
-                    ChessPosition castleStart = new ChessPosition(move.getStartPosition().getRow(), 1);
-                    ChessPosition castleEnd = new ChessPosition(move.getStartPosition().getRow(), 4);
+                } else if (endPos.getColumn() == 3) {
+                    ChessPosition castleStart = new ChessPosition(startPos.getRow(), 1);
+                    ChessPosition castleEnd = new ChessPosition(startPos.getRow(), 4);
                     executeMove(new ChessMove(castleStart, castleEnd, null));
                 }
             }
@@ -260,14 +227,14 @@ public class ChessGame {
 
         if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
             //See if the rook was originally in A column or H column, and set that to false
-            checkRookCastling(move.getStartPosition());
+            checkRookCastling(startPos);
         }
 
-        checkRookCastling(move.getEndPosition());
+        checkRookCastling(endPos);
 
 
         executeMove(move);
-        lastMove = move;
+        enPassantCalculator.setLastMove(move);
 
         if (teamTurn == TeamColor.WHITE) {
             teamTurn = TeamColor.BLACK;
@@ -293,14 +260,7 @@ public class ChessGame {
         }
     }
 
-    public boolean isEnPassantMove(ChessMove move) {
-        //check to see if moving diagonally
-        if (move.getStartPosition().getColumn() != move.getEndPosition().getColumn()) {
-            //If there is a piece there, it is a normal move, otherwise it is enPassant
-            return board.getPiece(move.getEndPosition()) == null;
-        }
-        return false;
-    }
+
 
     public boolean isCastlingMove(ChessMove move) {
         //If the king stays on the same row
