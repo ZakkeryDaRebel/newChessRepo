@@ -1,6 +1,7 @@
 package chess;
 
-import chess.movecalculators.EnPassantCalculator;
+import chess.extracreditcalculators.CastleCalculator;
+import chess.extracreditcalculators.EnPassantCalculator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,20 +16,15 @@ public class ChessGame {
 
     TeamColor teamTurn;
     ChessBoard board;
-    Boolean[] whiteCastling;
-    Boolean[] blackCastling;
-    EnPassantCalculator enPassantCalculator;
+    EnPassantCalculator enPassantCal;
+    CastleCalculator castleCal;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
-        enPassantCalculator = new EnPassantCalculator();
-
-        //whiteCastling and blackCastling stores if the pieces for castling haven't moved
-        whiteCastling = new Boolean[]{true, true, true};
-        blackCastling = new Boolean[]{true, true, true};
-        //castling[0] references the A rook, castling[1] references the King, and castling[2] references the H rook
+        enPassantCal = new EnPassantCalculator();
+        castleCal = new CastleCalculator();
     }
 
     /**
@@ -75,11 +71,11 @@ public class ChessGame {
             return null;
         }
 
-        //Get all of the pieceMoves to go through
+        //Get all the pieceMoves to go through and check
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
 
-        //Loop through possibleMoves and check to see if the king is in check
+        //Loop through possibleMoves and check to see if the king is in check after executing a move
         for (ChessMove move : possibleMoves) {
             ChessGame testGame = new ChessGame();
             ChessBoard testBoard = board.clone();
@@ -96,7 +92,7 @@ public class ChessGame {
         }
 
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            enPassantCalculator.checkEnPassant(board, startPosition, validMoves);
+            enPassantCal.checkEnPassant(board, startPosition, validMoves);
         } else if (piece.getPieceType() == ChessPiece.PieceType.KING) {
             checkCastling(startPosition, validMoves);
         }
@@ -108,9 +104,9 @@ public class ChessGame {
         ChessGame.TeamColor color = board.getPiece(startPosition).getTeamColor();
         Boolean[] castling;
         if (color == TeamColor.WHITE) {
-            castling = whiteCastling;
+            castling = castleCal.getWhiteCastleBool();
         } else {
-            castling = blackCastling;
+            castling = castleCal.getBlackCastleBool();
         }
 
         //If king has moved or if the king is in check, then can't castle
@@ -176,100 +172,79 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        if (validMoves(move.getStartPosition()) == null || !validMoves(move.getStartPosition()).contains(move)) {
-            throw new InvalidMoveException();
-        }
+        ChessPosition startPos = move.getStartPosition();
+        ChessPosition endPos = move.getEndPosition();
 
-        ChessPiece piece = board.getPiece(move.getStartPosition());
+        //No piece at startPosition
+        ChessPiece piece = board.getPiece(startPos);
         if (piece == null) {
             throw new InvalidMoveException();
         }
 
-        ChessGame.TeamColor color = piece.getTeamColor();
-        if(color != teamTurn) {
+        //No valid moves at startPosition
+        if (validMoves(startPos) == null || !validMoves(startPos).contains(move)) {
             throw new InvalidMoveException();
         }
 
-        ChessPosition startPos = move.getStartPosition();
-        ChessPosition endPos = move.getEndPosition();
+        //Not the piece at startPosition's turn
+        ChessGame.TeamColor color = piece.getTeamColor();
+        if (color != teamTurn) {
+            throw new InvalidMoveException();
+        }
 
-        //If EnPassant
+        //Check to see if the Pawn did EnPassant to update the other piece
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
-            if (enPassantCalculator.isEnPassantMove(board, move)) {
+            if (enPassantCal.isEnPassantMove(board, move)) {
                 ChessPosition capturedPiece = new ChessPosition(startPos.getRow(), endPos.getColumn());
                 //Remove piece that got en passant ed
                 board.addPiece(capturedPiece, null);
             }
         }
 
-        //If Castling
+        //Check to see if the King did Castle to update the other piece
         if (piece.getPieceType() == ChessPiece.PieceType.KING) {
-            if (isCastlingMove(move)) {
-                //Move rook that castled
+            if (castleCal.isCastlingMove(move)) {
+                //Move the rook that castled with the King
+                //Default to castle Queen side
+                int startCol = 1;
+                int endCol = 4;
+                //Check to see if castled King side
                 if (endPos.getColumn() == 7) {
-                    ChessPosition castleStart = new ChessPosition(startPos.getRow(), 8);
-                    ChessPosition castleEnd = new ChessPosition(startPos.getRow(), 6);
-                    executeMove(new ChessMove(castleStart, castleEnd, null));
-                } else if (endPos.getColumn() == 3) {
-                    ChessPosition castleStart = new ChessPosition(startPos.getRow(), 1);
-                    ChessPosition castleEnd = new ChessPosition(startPos.getRow(), 4);
-                    executeMove(new ChessMove(castleStart, castleEnd, null));
+                    startCol = 8;
+                    endCol = 6;
                 }
+                ChessPosition castleStart = new ChessPosition(startPos.getRow(), startCol);
+                ChessPosition castleEnd = new ChessPosition(startPos.getRow(), endCol);
+                executeMove(new ChessMove(castleStart, castleEnd, null));
+
+
             }
             //The king has moved, it can no longer castle
             if (color == TeamColor.WHITE) {
-                whiteCastling[1] = false;
+                castleCal.setCastleBool(TeamColor.WHITE, 1, false);
             } else {
-                blackCastling[1] = false;
+                castleCal.setCastleBool(TeamColor.BLACK, 1, false);
             }
         }
 
-
+        //If it was a rook that moved, possibly need to update castling abilities
         if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
             //See if the rook was originally in A column or H column, and set that to false
-            checkRookCastling(startPos);
+            castleCal.checkRookCastling(startPos);
         }
 
-        checkRookCastling(endPos);
-
+        //See if anyone captured the Rook's corner
+        castleCal.checkRookCastling(endPos);
 
         executeMove(move);
-        enPassantCalculator.setLastMove(move);
+        enPassantCal.setLastMove(move);
 
+        //Swap team turn
         if (teamTurn == TeamColor.WHITE) {
             teamTurn = TeamColor.BLACK;
         } else {
             teamTurn = TeamColor.WHITE;
         }
-    }
-
-    public void checkRookCastling(ChessPosition movePos) {
-        ChessPosition rookAOne = new ChessPosition(1,1);
-        ChessPosition rookAEight = new ChessPosition(8,1);
-        ChessPosition rookHOne = new ChessPosition(1, 8);
-        ChessPosition rookHEight = new ChessPosition(8, 8);
-
-        if (movePos.equals(rookAOne)) {
-            whiteCastling[0] = false;
-        } else if (movePos.equals(rookHOne)) {
-            whiteCastling[2] = false;
-        } else if (movePos.equals(rookAEight)) {
-            blackCastling[0] = false;
-        } else if (movePos.equals(rookHEight)) {
-            blackCastling[2] = false;
-        }
-    }
-
-
-
-    public boolean isCastlingMove(ChessMove move) {
-        //If the king stays on the same row
-        if(move.getStartPosition().getRow() == move.getEndPosition().getRow()) {
-            //If the king tries to move 2 spaces to the right or left, it's a castling move
-           return move.getStartPosition().getColumn() == move.getEndPosition().getColumn() - 2 ||
-                   move.getStartPosition().getColumn() == move.getEndPosition().getColumn() + 2;
-        }
-        return false;
     }
 
     public void executeMove(ChessMove move) {
@@ -294,9 +269,9 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = findKing(teamColor);
         if (kingPosition == null) {
+            //If you can't find the king, then the king can't be in check
             return false;
         }
-
         return canAttackKing(teamColor, kingPosition);
     }
 
@@ -314,7 +289,6 @@ public class ChessGame {
                 }
             }
         }
-
         return false;
     }
 
@@ -362,25 +336,8 @@ public class ChessGame {
     public void setBoard(ChessBoard board) {
         this.board = board;
 
-        //Check to see if pieces are in places for castling
-        ChessPiece whiteRook = new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.ROOK);
-        ChessPiece blackRook = new ChessPiece(TeamColor.BLACK, ChessPiece.PieceType.ROOK);
-        ChessPiece whiteKing = new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.KING);
-        ChessPiece blackKing = new ChessPiece(TeamColor.BLACK, ChessPiece.PieceType.KING);
-
-        ChessPiece pieceAOne = board.getPiece(new ChessPosition(1, 1));
-        ChessPiece pieceEOne = board.getPiece(new ChessPosition(1, 5));
-        ChessPiece pieceHOne = board.getPiece(new ChessPosition(1, 8));
-        ChessPiece pieceAEight = board.getPiece(new ChessPosition(8, 1));
-        ChessPiece pieceEEight = board.getPiece(new ChessPosition(8, 5));
-        ChessPiece pieceHEight = board.getPiece(new ChessPosition(8, 8));
-
-        whiteCastling[0] = (pieceAOne != null && pieceAOne.equals(whiteRook));
-        whiteCastling[1] = (pieceEOne != null && pieceEOne.equals(whiteKing));
-        whiteCastling[2] = (pieceHOne != null && pieceHOne.equals(whiteRook));
-        blackCastling[0] = (pieceAEight != null && pieceAEight.equals(blackRook));
-        blackCastling[1] = (pieceEEight != null && pieceEEight.equals(blackKing));
-        blackCastling[2] = (pieceHEight != null && pieceHEight.equals(blackRook));
+        enPassantCal.setLastMove(null);
+        castleCal.loadBoard(board);
     }
 
     /**
