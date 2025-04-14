@@ -8,8 +8,10 @@ public class CastleCalculator {
 
     Boolean[] whiteCastling;
     Boolean[] blackCastling;
+    ChessGame game;
 
-    public CastleCalculator() {
+    public CastleCalculator(ChessGame game) {
+        this.game = game;
         //whiteCastling and blackCastling stores if the pieces for castling haven't moved
         whiteCastling = new Boolean[]{true, true, true};
         blackCastling = new Boolean[]{true, true, true};
@@ -63,7 +65,7 @@ public class CastleCalculator {
         }
 
         //Make sure the king won't be attacked on b, c, or d column.
-        return !canAttackKing(board, color, cSpot) && !canAttackKing(board, color, dSpot);
+        return !game.canAttackKing(color, cSpot) && !game.canAttackKing(color, dSpot);
     }
 
     public boolean checkCastleKing(ChessBoard board, ChessPosition startPos, ChessGame.TeamColor color) {
@@ -78,7 +80,7 @@ public class CastleCalculator {
         }
 
         //Make sure the king won't be attacked on f or g column.
-        return !canAttackKing(board, color, fSpot) && !canAttackKing(board, color, gSpot);
+        return !game.canAttackKing(color, fSpot) && !game.canAttackKing(color, gSpot);
     }
 
     public void loadBoard(ChessBoard newBoard) {
@@ -126,23 +128,6 @@ public class CastleCalculator {
             //If the king tries to move 2 spaces to the right or left, it's a castling move
             return move.getStartPosition().getColumn() == move.getEndPosition().getColumn() - 2 ||
                     move.getStartPosition().getColumn() == move.getEndPosition().getColumn() + 2;
-        }
-        return false;
-    }
-
-    public boolean canAttackKing(ChessBoard board, ChessGame.TeamColor teamColor, ChessPosition kingPosition) {
-        for (int row = 1; row < 9; row++) {
-            for (int col = 1; col < 9; col++) {
-                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
-                if (piece != null && piece.getTeamColor() != teamColor) {
-                    Collection<ChessMove> pieceMoves = piece.pieceMoves(board, new ChessPosition(row, col));
-                    for (ChessMove attack : pieceMoves) {
-                        if (attack.getEndPosition().equals(kingPosition)) {
-                            return true;
-                        }
-                    }
-                }
-            }
         }
         return false;
     }
