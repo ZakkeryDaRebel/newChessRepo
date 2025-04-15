@@ -4,6 +4,25 @@ import spark.*;
 
 public class Server {
 
+    //RegisterHandler registerHandler;
+    //LoginHandler loginHandler;
+    //LogoutHandler logoutHandler;
+    //CreateGameHandler createGameHandler;
+    //ListGamesHandler listGamesHandler;
+    //JoinGameHandler joinGameHandler;
+    //clearHandler clearHandler;
+
+    public Server() {
+
+        //registerHandler = new RegisterHandler();
+        //loginHandler = new LoginHandler();
+        //logoutHandler = new LogoutHandler();
+        //createGameHandler = new CreateGameHandler();
+        //listGamesHandler = new ListGamesHandler();
+        //joinGameHandler = new JoinGameHandler();
+        //clearHandler = new clearHandler();
+    }
+
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
