@@ -1,7 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
-
+import java.util.UUID;
 import java.util.HashMap;
 
 public class MemoryAuthDAO implements AuthDAO {
@@ -12,8 +12,10 @@ public class MemoryAuthDAO implements AuthDAO {
         auths = new HashMap<>();
     }
 
-    public void createAuth(String authToken, String username) {
+    public void createAuth(String username) {
+        String authToken = UUID.randomUUID().toString();
         AuthData newAuth = new AuthData(authToken, username);
+        auths.put(authToken, newAuth);
     }
 
     public AuthData getAuth(String authToken) throws DataAccessException {
