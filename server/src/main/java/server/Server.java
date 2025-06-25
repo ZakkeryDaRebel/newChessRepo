@@ -2,8 +2,11 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
+import exception.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
+import requests.*;
+import results.*;
 import service.*;
 
 import java.util.Map;
@@ -33,8 +36,6 @@ public class Server {
         gameService = new GameService(authDAO, gameDAO);
         userService = new UserService(authDAO, userDAO);
 
-        //Create Handlers
-        //clearHandler = new ClearHandler(clearService);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
         // Register your endpoints and exception handlers here.
@@ -45,7 +46,7 @@ public class Server {
                 .post("/session", this::loginHandler)
                 .post("/game", this::createGameHandler)
                 .put("/game", this::joinGameHandler)
-                .exception(Exception.class, this::exceptionHandler)
+                .exception(ResponseException.class, this::exceptionHandler)
         ;
 
 
@@ -61,38 +62,58 @@ public class Server {
     }
 
     //Handlers
-    private void exceptionHandler(Exception ex, Context ctx) {
-        //Set exception status
-        ctx.status();
+    private void exceptionHandler(ResponseException ex, Context ctx) {
+        ctx.status(ex.getStatus());
         ctx.json(new Gson().toJson(Map.of("message", ex.getMessage())));
     }
 
-    private void clearHandler(Context ctx) throws Exception {
+    private void clearHandler(Context ctx) throws ResponseException {
         clearService.clear();
+        successHandler(ctx, "");
+    }
+
+    private void createGameHandler(Context ctx) throws ResponseException {
+        //Find authToken
+        CreateGameRequest createGameRequest = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
+        CreateGameResult createGameResult = gameService.createGame(createGameRequest);
+        successHandler(ctx, new Gson().toJson(createGameResult));
+    }
+
+    private void joinGameHandler(Context ctx) throws ResponseException {
+        //Find authToken
+        JoinGameRequest joinGameRequest = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+        gameService.joinGame(joinGameRequest);
+        successHandler(ctx, "");
+    }
+
+    private void listGamesHandler(Context ctx) throws ResponseException {
+        //Find authToken
+        ListGamesRequest listGamesRequest = new Gson().fromJson(ctx.body(), ListGamesRequest.class);
+        ListGamesResult listGamesResult = gameService.listGames(listGamesRequest);
+        successHandler(ctx, new Gson().toJson(listGamesResult));
+    }
+
+    private void loginHandler(Context ctx) throws ResponseException {
+        LoginRequest loginRequest = new Gson().fromJson(ctx.body(), LoginRequest.class);
+        LoginResult loginResult = userService.login(loginRequest);
+        successHandler(ctx, new Gson().toJson(loginResult));
+    }
+
+    private void logoutHandler(Context ctx) throws ResponseException {
+        //Find authToken
+        LogoutRequest logoutRequest = new Gson().fromJson(ctx.body(), LogoutRequest.class);
+        userService.logout(logoutRequest);
+        successHandler(ctx, "");
+    }
+
+    private void registerHandler(Context ctx) throws ResponseException {
+        RegisterRequest registerRequest = new Gson().fromJson(ctx.body(), RegisterRequest.class);
+        RegisterResult registerResult = userService.register(registerRequest);
+        successHandler(ctx, new Gson().toJson(registerResult));
+    }
+
+    private void successHandler(Context ctx, String json) {
         ctx.status(200);
-    }
-
-    private void createGameHandler(Context ctx) throws Exception {
-
-    }
-
-    private void joinGameHandler(Context ctx) throws Exception {
-
-    }
-
-    private void listGamesHandler(Context ctx) throws Exception {
-
-    }
-
-    private void loginHandler(Context ctx) throws Exception {
-
-    }
-
-    private void logoutHandler(Context ctx) throws Exception {
-
-    }
-
-    private void registerHandler(Context ctx) throws Exception {
-
+        ctx.json(json);
     }
 }

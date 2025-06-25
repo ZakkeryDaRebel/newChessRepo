@@ -15,7 +15,7 @@ public class ClearService {
         this.userDAO = userDAO;
     }
 
-    public void clear() throws Exception {
+    public void clear() throws ResponseException {
         try {
             authDAO.clearAuths();
             gameDAO.clearGames();
