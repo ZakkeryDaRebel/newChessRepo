@@ -1,13 +1,28 @@
 package service;
 
-import requests.ClearRequest;
-import results.ClearResult;
+import dataaccess.*;
+import exception.ResponseException;
 
 public class ClearService {
 
-    public ClearService() {}
+    private AuthDAO authDAO;
+    private GameDAO gameDAO;
+    private UserDAO userDAO;
 
-    public ClearResult clear(ClearRequest clearRequest) {
-        return null;
+    public ClearService(AuthDAO authDAO, GameDAO gameDAO, UserDAO userDAO) {
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
+        this.userDAO = userDAO;
+    }
+
+    public void clear() throws Exception {
+        try {
+            authDAO.clearAuths();
+            gameDAO.clearGames();
+            userDAO.clearUsers();
+        } catch (Exception ex) {
+            throw new ResponseException("Error: Failed to clear database ("+ex.getMessage()+")", 500);
+        }
+
     }
 }

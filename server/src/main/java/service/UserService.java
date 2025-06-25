@@ -1,11 +1,18 @@
 package service;
 
+import dataaccess.*;
 import requests.*;
 import results.*;
 
 public class UserService {
 
-    public UserService() {}
+    private AuthDAO authDAO;
+    private UserDAO userDAO;
+
+    public UserService(AuthDAO authDAO, UserDAO userDAO) {
+        this.authDAO = authDAO;
+        this.userDAO = userDAO;
+    }
 
     public RegisterResult register(RegisterRequest registerRequest) {
         return null;
@@ -15,7 +22,7 @@ public class UserService {
         return null;
     }
 
-    public LogoutResult logout(LogoutRequest logoutRequest)  {
-        return null;
+    public void logout(LogoutRequest logoutRequest)  {
+        return;
     }
 }
