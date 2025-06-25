@@ -73,41 +73,49 @@ public class Server {
     }
 
     private void createGameHandler(Context ctx) throws ResponseException {
-        //Find authToken
+        String authToken = ctx.header("Authorization");
         CreateGameRequest createGameRequest = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
+        createGameRequest = new CreateGameRequest(authToken, createGameRequest.gameName());
+
         CreateGameResult createGameResult = gameService.createGame(createGameRequest);
         successHandler(ctx, new Gson().toJson(createGameResult));
     }
 
     private void joinGameHandler(Context ctx) throws ResponseException {
-        //Find authToken
+        String authToken = ctx.header("Authorization");
         JoinGameRequest joinGameRequest = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
+        joinGameRequest = new JoinGameRequest(authToken, joinGameRequest.playerColor(), joinGameRequest.gameID());
+
         gameService.joinGame(joinGameRequest);
         successHandler(ctx, "");
     }
 
     private void listGamesHandler(Context ctx) throws ResponseException {
-        //Find authToken
-        ListGamesRequest listGamesRequest = new Gson().fromJson(ctx.body(), ListGamesRequest.class);
+        String authToken = ctx.header("Authorization");
+        ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
+
         ListGamesResult listGamesResult = gameService.listGames(listGamesRequest);
         successHandler(ctx, new Gson().toJson(listGamesResult));
     }
 
     private void loginHandler(Context ctx) throws ResponseException {
         LoginRequest loginRequest = new Gson().fromJson(ctx.body(), LoginRequest.class);
+
         LoginResult loginResult = userService.login(loginRequest);
         successHandler(ctx, new Gson().toJson(loginResult));
     }
 
     private void logoutHandler(Context ctx) throws ResponseException {
-        //Find authToken
-        LogoutRequest logoutRequest = new Gson().fromJson(ctx.body(), LogoutRequest.class);
+        String authToken = ctx.header("Authorization");
+        LogoutRequest logoutRequest = new LogoutRequest(authToken);
+
         userService.logout(logoutRequest);
         successHandler(ctx, "");
     }
 
     private void registerHandler(Context ctx) throws ResponseException {
         RegisterRequest registerRequest = new Gson().fromJson(ctx.body(), RegisterRequest.class);
+
         RegisterResult registerResult = userService.register(registerRequest);
         successHandler(ctx, new Gson().toJson(registerResult));
     }
