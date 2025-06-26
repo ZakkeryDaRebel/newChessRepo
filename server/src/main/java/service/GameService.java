@@ -8,6 +8,8 @@ import model.GameData;
 import results.*;
 import requests.*;
 
+import java.util.Collection;
+
 public class GameService {
 
     private AuthDAO authDAO;
@@ -19,7 +21,7 @@ public class GameService {
     }
 
     public CreateGameResult createGame(CreateGameRequest createGameRequest) throws ResponseException {
-        if (createGameRequest.gameName() == null || createGameRequest.authToken() == null) {
+        if (createGameRequest.gameName() == null) {
             throw new ResponseException("Error: Bad Request", 400);
         }
 
@@ -34,10 +36,6 @@ public class GameService {
     }
 
     public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
-        if (joinGameRequest.authToken() == null) {
-            throw new ResponseException("Error: Bad request", 400);
-        }
-
         String username = validateAuth(joinGameRequest.authToken());
 
         try {
@@ -66,7 +64,14 @@ public class GameService {
     }
 
     public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws ResponseException {
-        return null;
+        validateAuth(listGamesRequest.authToken());
+
+        try {
+            Collection<GameData> gameList = gameDAO.listGames();
+            return new ListGamesResult(gameList);
+        } catch (Exception ex) {
+            throw new ResponseException("Error: " + ex.getMessage(), 500);
+        }
     }
 
     public String validateAuth(String authToken) throws ResponseException {
