@@ -3,12 +3,11 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.*;
 import exception.ResponseException;
-import io.javalin.*;
+import io.javalin.Javalin;
 import io.javalin.http.Context;
 import requests.*;
 import results.*;
 import service.*;
-
 import java.util.Map;
 
 public class Server {
@@ -22,8 +21,6 @@ public class Server {
     private ClearService clearService;
     private GameService gameService;
     private UserService userService;
-
-    //private ClearHandler clearHandler;
 
     public Server() {
         //Memory Based DAOs
