@@ -1,8 +1,10 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 import results.*;
 import requests.*;
 
@@ -21,12 +23,7 @@ public class GameService {
             throw new ResponseException("Error: Bad Request", 400);
         }
 
-        AuthData auth;
-        try {
-            auth = authDAO.getAuth(createGameRequest.authToken());
-        } catch (DataAccessException ex) {
-            throw new ResponseException("Error: Unauthorized", 401);
-        }
+        validateAuth(createGameRequest.authToken());
 
         try {
             int gameID = gameDAO.createGame(createGameRequest.gameName());
@@ -37,10 +34,47 @@ public class GameService {
     }
 
     public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
-        return;
+        if (joinGameRequest.authToken() == null) {
+            throw new ResponseException("Error: Bad request", 400);
+        }
+
+        String username = validateAuth(joinGameRequest.authToken());
+
+        try {
+            GameData gameData = gameDAO.getGame(joinGameRequest.gameID());
+            String whiteName = gameData.whiteUsername();
+            String blackName = gameData.blackUsername();
+            if (joinGameRequest.playerColor() == ChessGame.TeamColor.WHITE) {
+                if (whiteName != null && !whiteName.equals(username)) {
+                    throw new ResponseException("Error: Already taken", 403);
+                }
+                whiteName = username;
+            } else {
+                if (blackName != null && !blackName.equals(username)) {
+                    throw new ResponseException("Error: Already taken", 403);
+                }
+                blackName = username;
+            }
+            gameDAO.updateGame(new GameData(gameData.gameID(),whiteName,blackName,gameData.gameName(),gameData.game()));
+        } catch (DataAccessException ex) {
+            throw new ResponseException("Error: Bad request", 400);
+        } catch (ResponseException rex) {
+            throw rex;
+        } catch (Exception ex) {
+            throw new ResponseException("Error: " + ex.getMessage(), 500);
+        }
     }
 
     public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws ResponseException {
         return null;
+    }
+
+    public String validateAuth(String authToken) throws ResponseException {
+        try {
+            AuthData auth = authDAO.getAuth(authToken);
+            return auth.username();
+        } catch (DataAccessException ex) {
+            throw new ResponseException("Error: Unauthorized", 401);
+        }
     }
 }
