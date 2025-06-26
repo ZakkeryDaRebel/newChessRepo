@@ -47,11 +47,14 @@ public class GameService {
                     throw new ResponseException("Error: Already taken", 403);
                 }
                 whiteName = username;
-            } else {
+            } else if (joinGameRequest.playerColor() == ChessGame.TeamColor.BLACK){
                 if (blackName != null && !blackName.equals(username)) {
                     throw new ResponseException("Error: Already taken", 403);
                 }
                 blackName = username;
+            }
+            else {
+                throw new ResponseException("Error: Bad request", 400);
             }
             gameDAO.updateGame(new GameData(gameData.gameID(),whiteName,blackName,gameData.gameName(),gameData.game()));
         } catch (DataAccessException ex) {
