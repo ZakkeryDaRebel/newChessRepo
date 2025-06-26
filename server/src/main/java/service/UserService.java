@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.*;
 import exception.ResponseException;
+import model.AuthData;
 import model.UserData;
 import requests.*;
 import results.*;
@@ -39,7 +40,21 @@ public class UserService {
     }
 
     public LoginResult login(LoginRequest loginRequest) throws ResponseException {
-        return null;
+        if (loginRequest.password() == null || loginRequest.username() == null) {
+            throw new ResponseException("Error: Bad request", 400);
+        }
+
+        try {
+            UserData userData = userDAO.getUser(loginRequest.username());
+            comparePasswords(loginRequest.password(), userData.password());
+            String authToken = generateAuthToken();
+            authDAO.createAuth(loginRequest.username(), authToken);
+            return new LoginResult(authToken, loginRequest.username());
+        } catch (DataAccessException ex) {
+            throw new ResponseException("Error: Unauthorized", 401);
+        } catch (Exception ex) {
+            throw new ResponseException("Error: " + ex.getMessage(), 500);
+        }
     }
 
     public void logout(LogoutRequest logoutRequest) throws ResponseException {
@@ -50,5 +65,9 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-
+    public void comparePasswords(String userPassword, String dataBasePassword) throws DataAccessException {
+        if (!userPassword.equals(dataBasePassword)) {
+            throw new DataAccessException("Error: Unauthorized");
+        }
+    }
 }
