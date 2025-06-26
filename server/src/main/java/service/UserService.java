@@ -58,7 +58,18 @@ public class UserService {
     }
 
     public void logout(LogoutRequest logoutRequest) throws ResponseException {
-        return;
+        if (logoutRequest.authToken() == null) {
+            throw new ResponseException("Error: Bad request", 400);
+        }
+
+        try {
+            AuthData auth = authDAO.getAuth(logoutRequest.authToken());
+            authDAO.deleteAuth(logoutRequest.authToken());
+        } catch (DataAccessException ex) {
+            throw new ResponseException("Error: Unauthorized", 401);
+        } catch (Exception ex) {
+            throw new ResponseException("Error: " + ex.getMessage(), 500);
+        }
     }
 
     public String generateAuthToken() {
