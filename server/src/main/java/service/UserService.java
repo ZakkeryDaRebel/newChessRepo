@@ -2,11 +2,9 @@ package service;
 
 import dataaccess.*;
 import exception.ResponseException;
-import model.AuthData;
 import model.UserData;
 import requests.*;
 import results.*;
-
 import java.util.UUID;
 
 public class UserService {
@@ -25,7 +23,7 @@ public class UserService {
         }
 
         try {
-            UserData user = userDAO.getUser(registerRequest.username());
+            userDAO.getUser(registerRequest.username());
             throw new ResponseException("Error: Already taken", 403);
         } catch (DataAccessException daex) {
             try {
@@ -63,7 +61,7 @@ public class UserService {
         }
 
         try {
-            AuthData auth = authDAO.getAuth(logoutRequest.authToken());
+            authDAO.getAuth(logoutRequest.authToken());
             authDAO.deleteAuth(logoutRequest.authToken());
         } catch (DataAccessException ex) {
             throw new ResponseException("Error: Unauthorized", 401);
