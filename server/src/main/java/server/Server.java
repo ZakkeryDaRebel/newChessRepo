@@ -23,10 +23,18 @@ public class Server {
     private UserService userService;
 
     public Server() {
-        //Memory Based DAOs
-        authDAO = new MemoryAuthDAO();
-        gameDAO = new MemoryGameDAO();
-        userDAO = new MemoryUserDAO();
+        try {
+            //First try to create SQL Based DAOs
+            authDAO = new SQLAuthDAO();
+            gameDAO = new SQLGameDAO();
+            userDAO = new SQLUserDAO();
+        } catch (Exception ex) {
+            //Memory Based DAOs if MySQL ones failed
+            authDAO = new MemoryAuthDAO();
+            gameDAO = new MemoryGameDAO();
+            userDAO = new MemoryUserDAO();
+        }
+
 
         //Create Services
         clearService = new ClearService(authDAO, gameDAO, userDAO);
