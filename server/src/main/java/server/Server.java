@@ -28,19 +28,19 @@ public class Server {
             authDAO = new SQLAuthDAO();
             gameDAO = new SQLGameDAO();
             userDAO = new SQLUserDAO();
+            System.out.println("Server is using SQL databases");
         } catch (Exception ex) {
             //Memory Based DAOs if MySQL ones failed
             authDAO = new MemoryAuthDAO();
             gameDAO = new MemoryGameDAO();
             userDAO = new MemoryUserDAO();
+            System.out.println("Server is using Memory databases");
         }
-
 
         //Create Services
         clearService = new ClearService(authDAO, gameDAO, userDAO);
         gameService = new GameService(authDAO, gameDAO);
         userService = new UserService(authDAO, userDAO);
-
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
         // Register your endpoints and exception handlers here.
@@ -53,8 +53,6 @@ public class Server {
                 .put("/game", this::joinGameHandler)
                 .exception(ResponseException.class, this::exceptionHandler)
         ;
-
-
     }
 
     public int run(int desiredPort) {
