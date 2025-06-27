@@ -49,7 +49,7 @@ public class SQLGameDAO implements GameDAO {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(createStatement)) {
-
+                ps.executeUpdate();
             }
         }
     }

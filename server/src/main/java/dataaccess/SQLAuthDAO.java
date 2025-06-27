@@ -41,14 +41,13 @@ public class SQLAuthDAO implements AuthDAO {
 
     }
 
-    private final String createStatement =
-            """
-            CREATE TABLE IF NOT EXISTS auth (
-              'authToken' VARCHAR(256) NOT NULL,
-              'username' VARCHAR(256) NOT NULL,
-              PRIMARY KEY ('authToken')
-            )
-            """;
+    private final String createStatement = """
+        CREATE TABLE IF NOT EXISTS auth (
+            'authToken' VARCHAR(256) NOT NULL,
+            'username' VARCHAR(256) NOT NULL,
+            PRIMARY KEY ('authToken')
+        )
+        """;
 
 
     public void configureDatabase() throws DataAccessException, SQLException {
