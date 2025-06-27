@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import exception.ResponseException;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import requests.*;
 import results.*;
 import java.util.UUID;
@@ -27,7 +28,8 @@ public class UserService {
             throw new ResponseException("Error: Already taken", 403);
         } catch (DataAccessException daex) {
             try {
-                userDAO.createUser(registerRequest.username(), registerRequest.password(), registerRequest.email());
+                String hashPassword = hashPassword(registerRequest.password());
+                userDAO.createUser(registerRequest.username(), hashPassword, registerRequest.email());
                 String authToken = generateAuthToken();
                 authDAO.createAuth(registerRequest.username(), authToken);
                 return new RegisterResult(authToken, registerRequest.username());
@@ -74,8 +76,12 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
+    public String hashPassword(String clearTextPassword) {
+        return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
+    }
+
     public void comparePasswords(String userPassword, String dataBasePassword) throws DataAccessException {
-        if (!userPassword.equals(dataBasePassword)) {
+        if (!userPassword.equals(dataBasePassword) && !BCrypt.checkpw(userPassword, dataBasePassword)) {
             throw new DataAccessException("Error: Unauthorized");
         }
     }
