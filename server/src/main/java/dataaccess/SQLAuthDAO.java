@@ -44,8 +44,8 @@ public class SQLAuthDAO implements AuthDAO {
     private final String createStatement =
             """
             CREATE TABLE IF NOT EXISTS auth (
-              'authToken' varchar(256) NOT NULL,
-              'username' varchar(256) NOT NULL,
+              'authToken' VARCHAR(256) NOT NULL,
+              'username' VARCHAR(256) NOT NULL,
               PRIMARY KEY ('authToken')
             )
             """;
