@@ -1,9 +1,11 @@
 package dataaccess;
 
+import exception.ResponseException;
 import model.UserData;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SQLUserDAO implements UserDAO {
@@ -12,16 +14,53 @@ public class SQLUserDAO implements UserDAO {
         configureDatabase();
     }
 
-    public void createUser(String username, String password, String email) {
-
+    public void createUser(String username, String password, String email) throws ResponseException {
+        String statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
+        try (Connection conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(0, username);
+                ps.setString(1, password);
+                ps.setString(2, email);
+                ps.executeUpdate();
+            }
+        } catch(DataAccessException ex) {
+            throw new ResponseException("Cannot connect to database (" + ex.getMessage() + ")", 500);
+        } catch(SQLException ex) {
+            throw new ResponseException("SQL Exception (" + ex.getMessage() + ")", 500);
+        }
     }
 
-    public UserData getUser(String username) throws DataAccessException {
-        return null;
+    public UserData getUser(String username) throws DataAccessException, ResponseException {
+        String statement = "SELECT password, email FROM user WHERE username=?";
+        try (Connection conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(0,username);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String password = rs.getString("password");
+                        String email = rs.getString("email");
+                        return new UserData(username, password, email);
+                    } else {
+                        throw new DataAccessException("Error: No such user");
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            throw new ResponseException("SQL Exception (" + ex.getMessage() + ")", 500);
+        }
     }
 
-    public void clearUsers() {
-
+    public void clearUsers() throws ResponseException {
+        String statement = "TRUNCATE TABLE user";
+        try (Connection conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            throw new ResponseException("SQL Exception (" + ex.getMessage() + ")", 500);
+        } catch (DataAccessException ex) {
+            throw new ResponseException("Cannot connect to Database", 500);
+        }
     }
 
     private String createStatement = """
