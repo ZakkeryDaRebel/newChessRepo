@@ -114,7 +114,7 @@ public class SQLGameDAO implements GameDAO {
             whiteUsername VARCHAR(256) DEFAULT NULL,
             blackUsername VARCHAR(256) DEFAULT NULL,
             gameName VARCHAR(256) NOT NULL,
-            game VARCHAR(256) NOT NULL
+            game VARCHAR(256) NOT NULL, 
             PRIMARY KEY (gameID)
         )
         """;
