@@ -20,8 +20,10 @@ public class SQLGameDAO implements GameDAO {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, gameName);
-                String json = new Gson().toJson(new ChessGame());
-                ps.setString(2, json);
+                ChessGame newGame = new ChessGame();
+                var gson = new Gson();
+                String game = gson.toJson(newGame);
+                ps.setString(2, game);
                 ps.executeUpdate();
 
                 ResultSet rs = ps.getGeneratedKeys();
@@ -34,6 +36,8 @@ public class SQLGameDAO implements GameDAO {
             throw new ResponseException("Cannot connect to the Database", 500);
         } catch (SQLException ex) {
             throw new ResponseException("SQL Exception (" + ex.getMessage() + ")", 500);
+        } catch (Exception ex) {
+            throw new ResponseException(ex.getMessage(), 500);
         }
     }
 
@@ -65,7 +69,7 @@ public class SQLGameDAO implements GameDAO {
                 try (ResultSet allGames = ps.executeQuery()) {
                     while (allGames.next()) {
                         int gameID = allGames.getInt("gameID");
-                        String whiteUsername = allGames.getString("whitUsername");
+                        String whiteUsername = allGames.getString("whiteUsername");
                         String blackUsername = allGames.getString("blackUsername");
                         String gameName = allGames.getString("gameName");
                         gameList.add(new GameData(gameID, whiteUsername, blackUsername, gameName, null));
@@ -114,7 +118,7 @@ public class SQLGameDAO implements GameDAO {
             whiteUsername VARCHAR(256) DEFAULT NULL,
             blackUsername VARCHAR(256) DEFAULT NULL,
             gameName VARCHAR(256) NOT NULL,
-            game VARCHAR(256) NOT NULL, 
+            game TEXT NOT NULL, 
             PRIMARY KEY (gameID)
         )
         """;
