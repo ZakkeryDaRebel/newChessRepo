@@ -110,11 +110,12 @@ public class SQLGameDAO implements GameDAO {
 
     private String createStatement = """
         CREATE TABLE IF NOT EXISTS game (
-            'gameID' INT NOT NULL AUTO_INCREMENT,
-            'whiteUsername' VARCHAR(256) DEFAULT NULL,
-            'blackUsername' VARCHAR(256) DEFAULT NULL,
-            'gameName' VARCHAR(256) NOT NULL,
-            'game' VARCHAR(256) NOT NULL
+            gameID INT NOT NULL AUTO_INCREMENT,
+            whiteUsername VARCHAR(256) DEFAULT NULL,
+            blackUsername VARCHAR(256) DEFAULT NULL,
+            gameName VARCHAR(256) NOT NULL,
+            game VARCHAR(256) NOT NULL
+            PRIMARY KEY (gameID)
         )
         """;
 

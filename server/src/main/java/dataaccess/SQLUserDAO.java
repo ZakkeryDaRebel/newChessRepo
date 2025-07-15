@@ -65,10 +65,10 @@ public class SQLUserDAO implements UserDAO {
 
     private String createStatement = """
         CREATE TABLE IF NOT EXISTS user (
-            'username' VARCHAR(256) NOT NULL,
-            'password' VARCHAR(256) NOT NULL,
-            'email' VARCHAR(256) NOT NULL,
-            PRIMARY KEY ('username')
+            username VARCHAR(256) NOT NULL,
+            password VARCHAR(256) NOT NULL,
+            email VARCHAR(256) NOT NULL,
+            PRIMARY KEY (username)
         )
         """;
 
