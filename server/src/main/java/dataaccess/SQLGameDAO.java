@@ -85,7 +85,7 @@ public class SQLGameDAO implements GameDAO {
     }
 
     public void updateGame(GameData gameData) throws DataAccessException, ResponseException {
-        String statement = "UPDATE game SET (whiteUsername, blackUsername, game) VALUES (?, ?, ?) WHERE gameID=?";
+        String statement = "UPDATE game SET whiteUsername=?, blackUsername=?, game=? WHERE gameID=?";
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setString(1, gameData.whiteUsername());
