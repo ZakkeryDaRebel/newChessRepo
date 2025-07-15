@@ -19,9 +19,9 @@ public class SQLGameDAO implements GameDAO {
         String statement = "INSERT INTO game (gameName, game) VALUES (?, ?)";
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setString(0, gameName);
+                ps.setString(1, gameName);
                 String json = new Gson().toJson(new ChessGame());
-                ps.setString(1, json);
+                ps.setString(2, json);
                 ps.executeUpdate();
 
                 ResultSet rs = ps.getGeneratedKeys();
@@ -41,7 +41,7 @@ public class SQLGameDAO implements GameDAO {
         String statement = "SELECT whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?";
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setInt(0, gameID);
+                ps.setInt(1, gameID);
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
                     String whiteUsername = rs.getString("whiteUsername");
@@ -84,10 +84,10 @@ public class SQLGameDAO implements GameDAO {
         String statement = "UPDATE game SET (whiteUsername, blackUsername, game) VALUES (?, ?, ?) WHERE gameID=?";
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(0, gameData.whiteUsername());
-                ps.setString(1, gameData.blackUsername());
-                ps.setString(2, new Gson().toJson(gameData.game()));
-                ps.setInt(3, gameData.gameID());
+                ps.setString(1, gameData.whiteUsername());
+                ps.setString(2, gameData.blackUsername());
+                ps.setString(3, new Gson().toJson(gameData.game()));
+                ps.setInt(4, gameData.gameID());
                 ps.executeUpdate();
             }
         } catch (SQLException ex) {

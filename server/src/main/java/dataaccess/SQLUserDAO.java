@@ -18,9 +18,9 @@ public class SQLUserDAO implements UserDAO {
         String statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(0, username);
-                ps.setString(1, password);
-                ps.setString(2, email);
+                ps.setString(1, username);
+                ps.setString(2, password);
+                ps.setString(3, email);
                 ps.executeUpdate();
             }
         } catch(DataAccessException ex) {
@@ -34,7 +34,7 @@ public class SQLUserDAO implements UserDAO {
         String statement = "SELECT password, email FROM user WHERE username=?";
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(0,username);
+                ps.setString(1,username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         String password = rs.getString("password");

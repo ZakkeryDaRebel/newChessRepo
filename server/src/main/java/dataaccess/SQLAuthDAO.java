@@ -19,8 +19,8 @@ public class SQLAuthDAO implements AuthDAO {
         String statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(0, authToken);
-                ps.setString(1, username);
+                ps.setString(1, authToken);
+                ps.setString(2, username);
                 ps.executeUpdate();
             }
         } catch (SQLException ex) {
@@ -34,7 +34,7 @@ public class SQLAuthDAO implements AuthDAO {
         String statement = "SELECT username FROM auth WHERE authToken=?";
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(0, authToken);
+                ps.setString(1, authToken);
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
                     String username = rs.getString("username");
@@ -51,6 +51,7 @@ public class SQLAuthDAO implements AuthDAO {
         String statement = "DELETE FROM auth WHERE authToken=?";
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
                 ps.executeUpdate();
             }
         } catch (SQLException ex) {
