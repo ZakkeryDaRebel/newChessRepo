@@ -40,6 +40,9 @@ public class GameService {
 
         try {
             GameData gameData = gameDAO.getGame(joinGameRequest.gameID());
+            if (gameData == null) {
+                throw new DataAccessException("Invalid gameID");
+            }
             String whiteName = gameData.whiteUsername();
             String blackName = gameData.blackUsername();
             if (joinGameRequest.playerColor() == ChessGame.TeamColor.WHITE) {
