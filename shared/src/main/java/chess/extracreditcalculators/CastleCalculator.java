@@ -1,6 +1,7 @@
 package chess.extracreditcalculators;
 
 import chess.*;
+import chess.movecalculators.AttackKingCalculator;
 
 import java.util.Collection;
 
@@ -8,10 +9,10 @@ public class CastleCalculator {
 
     Boolean[] whiteCastling;
     Boolean[] blackCastling;
-    ChessGame game;
+    AttackKingCalculator attackCal;
 
-    public CastleCalculator(ChessGame game) {
-        this.game = game;
+    public CastleCalculator() {
+        attackCal = new AttackKingCalculator();
         //whiteCastling and blackCastling stores if the pieces for castling haven't moved
         whiteCastling = new Boolean[]{true, true, true};
         blackCastling = new Boolean[]{true, true, true};
@@ -65,7 +66,7 @@ public class CastleCalculator {
         }
 
         //Make sure the king won't be attacked on b, c, or d column.
-        return !game.canAttackKing(color, cSpot) && !game.canAttackKing(color, dSpot);
+        return !attackCal.canAttackKing(board, color, cSpot) && !attackCal.canAttackKing(board, color, dSpot);
     }
 
     public boolean checkCastleKing(ChessBoard board, ChessPosition startPos, ChessGame.TeamColor color) {
@@ -80,7 +81,7 @@ public class CastleCalculator {
         }
 
         //Make sure the king won't be attacked on f or g column.
-        return !game.canAttackKing(color, fSpot) && !game.canAttackKing(color, gSpot);
+        return !attackCal.canAttackKing(board, color, fSpot) && !attackCal.canAttackKing(board, color, gSpot);
     }
 
     public void loadBoard(ChessBoard newBoard) {

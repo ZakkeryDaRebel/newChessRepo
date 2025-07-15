@@ -2,6 +2,7 @@ package chess;
 
 import chess.extracreditcalculators.CastleCalculator;
 import chess.extracreditcalculators.EnPassantCalculator;
+import chess.movecalculators.AttackKingCalculator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,13 +19,15 @@ public class ChessGame {
     ChessBoard board;
     EnPassantCalculator enPassantCal;
     CastleCalculator castleCal;
+    AttackKingCalculator attackCal;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
         enPassantCal = new EnPassantCalculator();
-        castleCal = new CastleCalculator(this);
+        castleCal = new CastleCalculator();
+        attackCal = new AttackKingCalculator();
     }
 
     /**
@@ -207,31 +210,10 @@ public class ChessGame {
             //If you can't find the king, then the king can't be in check
             return false;
         }
-        return canAttackKing(teamColor, kingPosition);
+        return attackCal.canAttackKing(board, teamColor, kingPosition);
     }
 
-    public boolean canAttackKing(TeamColor teamColor, ChessPosition kingPos) {
-        for (int row = 1; row < 9; row++) {
-            for (int col = 1; col < 9; col++) {
-                ChessPosition testPos = new ChessPosition(row, col);
-                ChessPiece piece = board.getPiece(testPos);
-                if (piece != null && piece.getTeamColor() != teamColor && pieceMeetsKing(piece, testPos, kingPos)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
-    public boolean pieceMeetsKing(ChessPiece piece, ChessPosition testPos, ChessPosition kingPos) {
-        Collection<ChessMove> pieceMoves = piece.pieceMoves(board, testPos);
-        for (ChessMove attack : pieceMoves) {
-            if (attack.getEndPosition().equals(kingPos)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Determines if the given team is in checkmate
