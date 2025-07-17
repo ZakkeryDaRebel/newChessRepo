@@ -72,17 +72,21 @@ public class AuthDAOTests {
 
     @Test
     public void deleteNonexistingAuth() {
+        createAuth();
         //Deleting something that doesn't exist in SQL doesn't throw an exception
         Assertions.assertDoesNotThrow(() -> {
-            authDAO.deleteAuth("1234");
+            authDAO.deleteAuth("9876");
+            Assertions.assertEquals(new AuthData("1234", "username"), authDAO.getAuth("1234"));
         });
     }
 
     @Test
     public void deleteBadAuth() {
+        createAuth();
         //Deleting something that doesn't exist in SQL doesn't throw an exception
         Assertions.assertDoesNotThrow(() -> {
             authDAO.deleteAuth(null);
+            Assertions.assertEquals(new AuthData("1234", "username"), authDAO.getAuth("1234"));
         });
     }
 
