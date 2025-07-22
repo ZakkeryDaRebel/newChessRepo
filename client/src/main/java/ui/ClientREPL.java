@@ -1,25 +1,18 @@
 package ui;
 
-import model.GameData;
-import requests.*;
-import results.*;
-
-import java.util.Collection;
 import java.util.Scanner;
 
 public class ClientREPL {
 
     private UserState state = UserState.OUT;
-    String authToken;
-    Collection<GameData> gameList;
     ClientOUT clientOUT;
-    //ClientIN clientIN;
+    ClientIN clientIN;
     //ClientPLAY clientPLAY;
 
     public ClientREPL(String serverURL) {
         //Create connection to ServerFacade (pass in serverURL)
         clientOUT = new ClientOUT();
-        //clientIN = new ClientIN();
+        clientIN = new ClientIN();
         //clientPLAY = new ClientPLAY();
     }
 
@@ -49,73 +42,65 @@ public class ClientREPL {
             input = scan.nextLine();
             System.out.println("User input: " + input);
 
-            //Eval
-            if (input.equals("1") || input.equalsIgnoreCase("H") || input.equalsIgnoreCase("Help")) {
-                System.out.println(help());
-                continue;
-            }
-            switch (state) {
-                case OUT: {
-                    String result = clientOUT.outEval(scan, input);
-                    if (result.startsWith("authToken:")) {
-                        state = UserState.IN;
-                        authToken = result.substring(10);
-                    } else if (result.equals("error")) {
-                        error();
-                    }
-                    break;
-                }
-                case IN: inEval(scan, input); break;
-                case PLAY: playEval(scan, input); break;
-                default: error();
-            }
+            evalInput(scan, input);
         }
         System.out.println("\n Thanks for playing at the CGI! Have a great rest of your day, and hope to see you soon!");
+    }
+
+    public void evalInput(Scanner scan, String input) {
+        if (input.equals("1") || input.equalsIgnoreCase("H") || input.equalsIgnoreCase("Help")) {
+            System.out.println(help());
+            return;
+        }
+        switch (state) {
+            case OUT: {
+                evalResult(clientOUT.outEval(scan, input));
+                break;
+            }
+            case IN: {
+                evalResult(clientIN.inEval(scan, input));
+                break;
+            }
+            case PLAY: {
+                evalResult(playEval(scan, input));
+                break;
+            }
+            default: error();
+        }
+    }
+
+    public void evalResult(String result) {
+        if (result.startsWith("authToken:")) {
+            state = UserState.IN;
+            clientIN.updateAuthToken(result.substring(10));
+        } else if (result.equals("invalid input")) {
+            error();
+        } else if (result.equals("logout")) {
+            state = UserState.OUT;
+        } else if (result.startsWith("Message:")) {
+            printMessage(result.substring(8));
+        } else if (result.startsWith("Error:")) {
+            printError(result);
+        }
+        //"quit"
+    }
+
+    public void printMessage(String message) {
+        System.out.println(" " + message);
+    }
+
+    public void printError(String error) {
+        System.out.println(" " + error);
     }
 
     public void printPrompt() {
         System.out.print("\n " + stateToString() + ">>> ");
     }
 
-    public void inEval(Scanner scan, String input) {
-        if (input.equals("2") || input.equalsIgnoreCase("Q") || input.equalsIgnoreCase("Quit")) {
-            LogoutRequest request = new LogoutRequest(authToken);
-            //Send Logout request
-            authToken = null;
-        } else if (input.equals("3") || input.equalsIgnoreCase("G") || input.equalsIgnoreCase("Logout")) {
-            LogoutRequest request = new LogoutRequest(authToken);
-            //Send Logout request
-            authToken = null;
-            state = UserState.OUT;
-        } else if (input.equals("4") || input.equalsIgnoreCase("C") || input.equalsIgnoreCase("Create")) {
-            System.out.println("\n Please enter the name of the game you would like to create");
-            printPrompt();
-            String gameName = scan.nextLine();
-            CreateGameRequest request = new CreateGameRequest(authToken, gameName);
-            //Send CreateGame Request
-        } else if (input.equals("5") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("List")) {
-            ListGamesRequest request = new ListGamesRequest(authToken);
-            //Sen ListGames Request
-        } else if (input.equals("6") || input.equalsIgnoreCase("P") || input.equalsIgnoreCase("Play")) {
-            System.out.println("\n Please enter the game number of the game you would like to play in");
-            printPrompt();
-            String gameNumberString = scan.nextLine();
-            try {
-                int gameNumber = Integer.parseInt(gameNumberString);
-            } catch (Exception ex) {
-                System.out.println("\n That is not a number. Please try again later");
-                return;
-            }
 
-        } else if (input.equals("7") || input.equalsIgnoreCase("O") || input.equalsIgnoreCase("Observe")) {
 
-        } else {
-            error();
-        }
-    }
-
-    public void playEval(Scanner scan, String input) {
-
+    public String playEval(Scanner scan, String input) {
+        return "empty";
     }
 
     public void error() {

@@ -18,6 +18,7 @@ public class ClientOUT {
     public String outEval(Scanner scan, String input) {
         if (input.equals("2") || input.equalsIgnoreCase("Q") || input.equalsIgnoreCase("Quit")) {
             //Quit doesn't need to do anything when they haven't signed in yet
+            return "quit";
         } else if (input.equals("3") || input.equalsIgnoreCase("R") || input.equalsIgnoreCase("Register")) {
             LoginRequest loginReq = getLoginInfo(scan);
             System.out.println("\n Please enter your email");
@@ -35,7 +36,7 @@ public class ClientOUT {
             String authToken = "1234";
             return "authToken:" + authToken;
         } else {
-            return "error";
+            return "invalid input";
         }
     }
 
