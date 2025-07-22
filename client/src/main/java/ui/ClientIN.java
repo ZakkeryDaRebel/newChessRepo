@@ -20,7 +20,7 @@ public class ClientIN {
     }
 
     public void printPrompt() {
-        System.out.print("\n [SIGNED IN]>>> ");
+        System.out.print(" [SIGNED IN]>>> ");
     }
 
     public void updateAuthToken(String authToken) {
@@ -29,15 +29,15 @@ public class ClientIN {
 
     public String inEval(Scanner scan, String input) {
         if (input.equals("2") || input.equalsIgnoreCase("Q") || input.equalsIgnoreCase("Quit")) {
-            LogoutRequest request = new LogoutRequest(authToken);
-            //Send Logout request
-            authToken = null;
-            return "quit";
+            if (logout().equals("success")) {
+                return "quit";
+            }
+            return "Error: Failed to quit";
         } else if (input.equals("3") || input.equalsIgnoreCase("G") || input.equalsIgnoreCase("Logout")) {
-            LogoutRequest request = new LogoutRequest(authToken);
-            //Send Logout request
-            authToken = null;
-            return "logout";
+            if (logout().equals("success")) {
+                return "logout";
+            }
+            return "Error: Failed to logout";
         } else if (input.equals("4") || input.equalsIgnoreCase("C") || input.equalsIgnoreCase("Create")) {
             System.out.println("\n Please enter the name of the game you would like to create");
             printPrompt();
@@ -83,6 +83,13 @@ public class ClientIN {
         } else {
             return "invalid input";
         }
+    }
+
+    public String logout() {
+        LogoutRequest request = new LogoutRequest(authToken);
+        //Send Logout request
+        authToken = null;
+        return "success";
     }
 
     public int getGameNumber(Scanner scan) throws NumberFormatException {

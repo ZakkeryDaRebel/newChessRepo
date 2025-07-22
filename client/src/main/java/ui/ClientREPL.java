@@ -40,7 +40,7 @@ public class ClientREPL {
         while (!input.equals("2") && !input.equalsIgnoreCase("Q") && !input.equalsIgnoreCase("Quit")) {
             printPrompt();
             input = scan.nextLine();
-            System.out.println("User input: " + input);
+            //System.out.println("User input: " + input);   //Testing purposes
 
             evalInput(scan, input);
         }
@@ -73,10 +73,14 @@ public class ClientREPL {
         if (result.startsWith("authToken:")) {
             state = UserState.IN;
             clientIN.updateAuthToken(result.substring(10));
+            System.out.println("\n You have successfully signed into the CGI");
+            System.out.println(help());
         } else if (result.equals("invalid input")) {
             error();
         } else if (result.equals("logout")) {
             state = UserState.OUT;
+            System.out.println(" You have successfully logged out of the CGI");
+            System.out.println(help());
         } else if (result.startsWith("Message:")) {
             printMessage(result.substring(8));
         } else if (result.startsWith("Error:")) {
@@ -94,7 +98,7 @@ public class ClientREPL {
     }
 
     public void printPrompt() {
-        System.out.print("\n " + stateToString() + ">>> ");
+        System.out.print(" " + stateToString() + ">>> ");
     }
 
 

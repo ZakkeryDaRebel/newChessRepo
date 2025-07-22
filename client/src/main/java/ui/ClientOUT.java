@@ -12,7 +12,7 @@ public class ClientOUT {
     }
 
     public void printPrompt() {
-        System.out.print("\n [LOGGED OUT]>>> ");
+        System.out.print(" [LOGGED OUT]>>> ");
     }
 
     public String outEval(Scanner scan, String input) {
