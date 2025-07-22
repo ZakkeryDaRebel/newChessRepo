@@ -12,11 +12,15 @@ public class ClientREPL {
     private UserState state = UserState.OUT;
     String authToken;
     Collection<GameData> gameList;
-    ClientOUT
+    ClientOUT clientOUT;
+    //ClientIN clientIN;
+    //ClientPLAY clientPLAY;
 
     public ClientREPL(String serverURL) {
         //Create connection to ServerFacade (pass in serverURL)
-        ClientOUT
+        clientOUT = new ClientOUT();
+        //clientIN = new ClientIN();
+        //clientPLAY = new ClientPLAY();
     }
 
     public enum UserState {
@@ -51,7 +55,16 @@ public class ClientREPL {
                 continue;
             }
             switch (state) {
-                case OUT: outEval(scan, input); break;
+                case OUT: {
+                    String result = clientOUT.outEval(scan, input);
+                    if (result.startsWith("authToken:")) {
+                        state = UserState.IN;
+                        authToken = result.substring(10);
+                    } else if (result.equals("error")) {
+                        error();
+                    }
+                    break;
+                }
                 case IN: inEval(scan, input); break;
                 case PLAY: playEval(scan, input); break;
                 default: error();
@@ -62,38 +75,6 @@ public class ClientREPL {
 
     public void printPrompt() {
         System.out.print("\n " + stateToString() + ">>> ");
-    }
-
-    public void outEval(Scanner scan, String input) {
-        if (input.equals("2") || input.equalsIgnoreCase("Q") || input.equalsIgnoreCase("Quit")) {
-            //Quit doesn't need to do anything when they haven't signed in yet
-        } else if (input.equals("3") || input.equalsIgnoreCase("R") || input.equalsIgnoreCase("Register")) {
-            LoginRequest loginReq = getLoginInfo(scan);
-            System.out.println("\n Please enter your email");
-            printPrompt();
-            String email = scan.nextLine();
-            RegisterRequest registerReq = new RegisterRequest(loginReq.username(), loginReq.password(), email);
-            //Send Register Request
-            //Get authToken from result
-            state = UserState.IN;
-        } else if (input.equals("4") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("Login")) {
-            LoginRequest loginReq = getLoginInfo(scan);
-            //Send Login Request
-            //Get authToken from result
-            state = UserState.IN;
-        } else {
-            error();
-        }
-    }
-
-    public LoginRequest getLoginInfo(Scanner scan) {
-        System.out.println("\n Please enter your username");
-        printPrompt();
-        String username = scan.nextLine();
-        System.out.println("\n Please enter your password");
-        printPrompt();
-        String password = scan.nextLine();
-        return new LoginRequest(username, password);
     }
 
     public void inEval(Scanner scan, String input) {
