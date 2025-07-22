@@ -1,16 +1,22 @@
 package ui;
 
-import requests.LoginRequest;
-import requests.RegisterRequest;
+import model.GameData;
+import requests.*;
+import results.*;
 
+import java.util.Collection;
 import java.util.Scanner;
 
 public class ClientREPL {
 
     private UserState state = UserState.OUT;
+    String authToken;
+    Collection<GameData> gameList;
+    ClientOUT
 
     public ClientREPL(String serverURL) {
         //Create connection to ServerFacade (pass in serverURL)
+        ClientOUT
     }
 
     public enum UserState {
@@ -43,8 +49,6 @@ public class ClientREPL {
             if (input.equals("1") || input.equalsIgnoreCase("H") || input.equalsIgnoreCase("Help")) {
                 System.out.println(help());
                 continue;
-            } else if (state != UserState.PLAY && input.equals("2") || input.equalsIgnoreCase("Q") || input.equalsIgnoreCase("Quit")) {
-                continue;
             }
             switch (state) {
                 case OUT: outEval(scan, input); break;
@@ -61,17 +65,21 @@ public class ClientREPL {
     }
 
     public void outEval(Scanner scan, String input) {
-        if (input.equals("3") || input.equalsIgnoreCase("R") || input.equalsIgnoreCase("Register")) {
+        if (input.equals("2") || input.equalsIgnoreCase("Q") || input.equalsIgnoreCase("Quit")) {
+            //Quit doesn't need to do anything when they haven't signed in yet
+        } else if (input.equals("3") || input.equalsIgnoreCase("R") || input.equalsIgnoreCase("Register")) {
             LoginRequest loginReq = getLoginInfo(scan);
             System.out.println("\n Please enter your email");
             printPrompt();
             String email = scan.nextLine();
             RegisterRequest registerReq = new RegisterRequest(loginReq.username(), loginReq.password(), email);
             //Send Register Request
+            //Get authToken from result
             state = UserState.IN;
         } else if (input.equals("4") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("Login")) {
             LoginRequest loginReq = getLoginInfo(scan);
             //Send Login Request
+            //Get authToken from result
             state = UserState.IN;
         } else {
             error();
@@ -89,7 +97,40 @@ public class ClientREPL {
     }
 
     public void inEval(Scanner scan, String input) {
+        if (input.equals("2") || input.equalsIgnoreCase("Q") || input.equalsIgnoreCase("Quit")) {
+            LogoutRequest request = new LogoutRequest(authToken);
+            //Send Logout request
+            authToken = null;
+        } else if (input.equals("3") || input.equalsIgnoreCase("G") || input.equalsIgnoreCase("Logout")) {
+            LogoutRequest request = new LogoutRequest(authToken);
+            //Send Logout request
+            authToken = null;
+            state = UserState.OUT;
+        } else if (input.equals("4") || input.equalsIgnoreCase("C") || input.equalsIgnoreCase("Create")) {
+            System.out.println("\n Please enter the name of the game you would like to create");
+            printPrompt();
+            String gameName = scan.nextLine();
+            CreateGameRequest request = new CreateGameRequest(authToken, gameName);
+            //Send CreateGame Request
+        } else if (input.equals("5") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("List")) {
+            ListGamesRequest request = new ListGamesRequest(authToken);
+            //Sen ListGames Request
+        } else if (input.equals("6") || input.equalsIgnoreCase("P") || input.equalsIgnoreCase("Play")) {
+            System.out.println("\n Please enter the game number of the game you would like to play in");
+            printPrompt();
+            String gameNumberString = scan.nextLine();
+            try {
+                int gameNumber = Integer.parseInt(gameNumberString);
+            } catch (Exception ex) {
+                System.out.println("\n That is not a number. Please try again later");
+                return;
+            }
 
+        } else if (input.equals("7") || input.equalsIgnoreCase("O") || input.equalsIgnoreCase("Observe")) {
+
+        } else {
+            error();
+        }
     }
 
     public void playEval(Scanner scan, String input) {
