@@ -27,6 +27,9 @@ public class UserService {
             userDAO.getUser(registerRequest.username());
             throw new ResponseException("Error: Already taken", 403);
         } catch (DataAccessException daex) {
+            if (daex.getMessage().contains("cannot connect")) {
+                throw new ResponseException("Error: " + daex.getMessage(), 500);
+            }
             try {
                 String hashPassword = hashPassword(registerRequest.password());
                 userDAO.createUser(registerRequest.username(), hashPassword, registerRequest.email());
@@ -51,6 +54,9 @@ public class UserService {
             authDAO.createAuth(loginRequest.username(), authToken);
             return new LoginResult(authToken, loginRequest.username());
         } catch (DataAccessException ex) {
+            if (ex.getMessage().contains("cannot connect")) {
+                throw new ResponseException("Error: " + ex.getMessage(), 500);
+            }
             throw new ResponseException("Error: Unauthorized", 401);
         } catch (Exception ex) {
             throw new ResponseException("Error: " + ex.getMessage(), 500);
@@ -66,6 +72,9 @@ public class UserService {
             authDAO.getAuth(logoutRequest.authToken());
             authDAO.deleteAuth(logoutRequest.authToken());
         } catch (DataAccessException ex) {
+            if (ex.getMessage().contains("cannot connect")) {
+                throw new ResponseException("Error: " + ex.getMessage(), 500);
+            }
             throw new ResponseException("Error: Unauthorized", 401);
         } catch (Exception ex) {
             throw new ResponseException("Error: " + ex.getMessage(), 500);

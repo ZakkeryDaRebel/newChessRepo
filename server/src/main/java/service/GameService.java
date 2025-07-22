@@ -61,6 +61,9 @@ public class GameService {
             }
             gameDAO.updateGame(new GameData(gameData.gameID(),whiteName,blackName,gameData.gameName(),gameData.game()));
         } catch (DataAccessException ex) {
+            if (ex.getMessage().contains("cannot connect")) {
+                throw new ResponseException("Error: " + ex.getMessage(), 500);
+            }
             throw new ResponseException("Error: Bad request", 400);
         } catch (ResponseException rex) {
             throw rex;
@@ -85,6 +88,9 @@ public class GameService {
             AuthData auth = authDAO.getAuth(authToken);
             return auth.username();
         } catch (DataAccessException ex) {
+            if (ex.getMessage().contains("cannot connect")) {
+                throw new ResponseException("Error: " + ex.getMessage(), 500);
+            }
             throw new ResponseException("Error: Unauthorized", 401);
         }
     }
