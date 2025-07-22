@@ -54,10 +54,10 @@ public class UserService {
             authDAO.createAuth(loginRequest.username(), authToken);
             return new LoginResult(authToken, loginRequest.username());
         } catch (DataAccessException ex) {
-            if (ex.getMessage().contains("cannot connect")) {
-                throw new ResponseException("Error: " + ex.getMessage(), 500);
+            if (ex.getMessage().contains("Unauthorized")) {
+                throw new ResponseException("Error: Unauthorized", 401);
             }
-            throw new ResponseException("Error: Unauthorized", 401);
+            throw new ResponseException("Error: " + ex.getMessage(), 500);
         } catch (Exception ex) {
             throw new ResponseException("Error: " + ex.getMessage(), 500);
         }
@@ -72,10 +72,11 @@ public class UserService {
             authDAO.getAuth(logoutRequest.authToken());
             authDAO.deleteAuth(logoutRequest.authToken());
         } catch (DataAccessException ex) {
-            if (ex.getMessage().contains("cannot connect")) {
-                throw new ResponseException("Error: " + ex.getMessage(), 500);
+            if (ex.getMessage().contains("Unauthorized")) {
+                throw new ResponseException("Error: Unauthorized", 401);
             }
-            throw new ResponseException("Error: Unauthorized", 401);
+            throw new ResponseException("Error: " + ex.getMessage(), 500);
+
         } catch (Exception ex) {
             throw new ResponseException("Error: " + ex.getMessage(), 500);
         }
