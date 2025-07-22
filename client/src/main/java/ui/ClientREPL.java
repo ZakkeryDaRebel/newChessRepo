@@ -127,26 +127,35 @@ public class ClientREPL {
         switch (state) {
             case OUT: return " - Enter \"1\", \"H\", or \"Help\" to show this list of actions you can take again"
                     + "\n" + " - Enter \"2\", \"Q\", or \"Quit\" to exit the Chess Game Interface (or CGI)"
-                    + "\n" + " - Enter \"3\", \"R\", or \"Register\" to create a new user (will need a username, password, and email)"
-                    + "\n" + " - Enter \"4\", \"L\", or \"Login\" to login as an existing user (will need a username and password)";
+                    + "\n" + " - Enter \"3\", \"R\", or \"Register\" to create a new user"
+                    + "\n" + "         (You will need to supply a username, password, and email)"
+                    + "\n" + " - Enter \"4\", \"L\", or \"Login\" to login as an existing user"
+                    + "\n" + "         (You will need to supply a username and password)";
 
             case IN: return  " - Enter \"1\", \"H\", or \"Help\" to show this list of actions you can take again"
                     + "\n" + " - Enter \"2\", \"Q\", or \"Quit\" to logout and exit the Chess Game Interface (or CGI)"
                     + "\n" + " - Enter \"3\", \"G\", or \"Logout\" to logout and return to pre signed in state"
-                    + "\n" + " - Enter \"4\", \"C\", or \"Create\" to create a new game (will need a game name)"
+                    + "\n" + " - Enter \"4\", \"C\", or \"Create\" to create a new game"
+                    + "\n" + "         (You will need to supply a game name)"
                     + "\n" + " - Enter \"5\", \"L\", or \"List\" to list all the games"
-                    + "\n" + " - Enter \"6\", \"P\", or \"Play\" to join a game as a player (will need a game number and player color)"
-                    + "\n" + " - Enter \"7\", \"O\", or \"Observe\" to join a game as an observer (will need a game number)";
+                    + "\n" + " - Enter \"6\", \"P\", or \"Play\" to join a game as a player"
+                    + "\n" + "         (You will need to supply a game number and player color)"
+                    + "\n" + " - Enter \"7\", \"O\", or \"Observe\" to join a game as an observer"
+                    + "\n" + "         (You will need to supply a game number)";
 
             case PLAY:return " - Enter \"1\", \"H\", or \"Help\" to show this list of actions you can take again"
                     + "\n" + " - Enter \"2\", \"L\", or \"Leave\" to leave the game and return to signed in state"
-                    + "\n" + " - Enter \"3\", \"I\", or \"Highlight\" to highlight the legal moves for a chess piece (will need a row and column of the piece you want to check)"
+                    + "\n" + " - Enter \"3\", \"I\", or \"Highlight\" to highlight the legal moves for a chess piece"
+                    + "\n" + "         (You will need to supply the row and column of the piece you want to check)"
                     + "\n" + " - Enter \"4\", \"D\", or \"Draw\" to redraw the chess board"
-                    + "\n" + " ~ The options below are only if you are playing the game, not if you are observing the game"
-                    + "\n" + " - Enter \"5\", \"M\", or \"Move\" to move a chess piece (will need a row and column of the piece you want to move, and the row and column of where you want to move it to"
+                    + "\n" + " ~ The options below are only if you are playing in the game, not observing the game"
+                    + "\n" + " - Enter \"5\", \"M\", or \"Move\" to move a chess piece"
+                    + "\n" + "         (You will need to supply the row and column of the piece you want to move,"
+                    + "\n" + "           and the row and column of where you want to move the piece to)"
                     + "\n" + " - Enter \"6\", \"R\", or \"Resign\" to resign the game";
 
-            default: return " Null state, enter \"2\", \"Q\", or \"Quit\" to quit the CGI.";
+            default: return  " We apologize, the CGI has last track of where you are in the system,"
+                    + "\n" + " Please enter \"2\", \"Q\", or \"Quit\" to quit the CGI.";
         }
     }
 }
