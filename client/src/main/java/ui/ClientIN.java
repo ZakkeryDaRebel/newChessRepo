@@ -44,12 +44,15 @@ public class ClientIN {
             String gameName = scan.nextLine();
             CreateGameRequest request = new CreateGameRequest(authToken, gameName);
             //Send CreateGame Request
-            return "Message:" + "successfully created game";
+            return "Message:" + "successfully created the game (" + gameName + ")";
         } else if (input.equals("5") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("List")) {
             ListGamesRequest request = new ListGamesRequest(authToken);
             //Sen ListGames Request
             return "Message:" + "no current games";
         } else if (input.equals("6") || input.equalsIgnoreCase("P") || input.equalsIgnoreCase("Play")) {
+            if (isListEmpty()) {
+                return "empty list";
+            }
             int gameID;
             try {
                 gameID = getGameNumber(scan);
@@ -72,6 +75,9 @@ public class ClientIN {
             //Send JoinGame Request
             return "play: "+playerColor;
         } else if (input.equals("7") || input.equalsIgnoreCase("O") || input.equalsIgnoreCase("Observe")) {
+            if (isListEmpty()) {
+                return "empty list";
+            }
             int gameID;
             try {
                 gameID = getGameNumber(scan);
@@ -101,5 +107,19 @@ public class ClientIN {
 
         GameData gameData = gameList.get(gameNumber);
         return gameData.gameID();
+    }
+
+    public boolean isListEmpty() {
+        if (gameList == null) {
+            System.out.println(" Before you can join a game, make sure you enter \"5\", \"L\", or \"List\""
+                    + "\n" +   "   so that you can know what games are available to join");
+            return true;
+        } else if (gameList.isEmpty()) {
+            System.out.println(" Sorry, there are no games available to join right now. If you would like, you can"
+                    + "\n" +   "   Enter \"4\", \"C\", or \"Create\" to create a game or wait till someone else does");
+            return true;
+        } else {
+            return false;
+        }
     }
 }
