@@ -1,5 +1,8 @@
 package ui;
 
+import connection.ServerFacade;
+import exception.ResponseException;
+
 import java.util.Scanner;
 
 public class ClientREPL {
@@ -8,10 +11,11 @@ public class ClientREPL {
     ClientOUT clientOUT;
     ClientIN clientIN;
     //ClientPLAY clientPLAY;
+    ServerFacade serverFacade;
 
     public ClientREPL(String serverURL) {
-        //Create connection to ServerFacade (pass in serverURL)
-        clientOUT = new ClientOUT();
+        serverFacade = new ServerFacade(serverURL);
+        clientOUT = new ClientOUT(serverFacade);
         clientIN = new ClientIN();
         //clientPLAY = new ClientPLAY();
     }
@@ -41,13 +45,16 @@ public class ClientREPL {
             printPrompt();
             input = scan.nextLine();
             //System.out.println("User input: " + input);   //Testing purposes
-
-            evalInput(scan, input);
+            try {
+                evalInput(scan, input);
+            } catch (ResponseException ex) {
+                printError(ex.getMessage());
+            }
         }
         System.out.println("\n Thanks for playing at the CGI! Have a great rest of your day, and hope to see you soon!");
     }
 
-    public void evalInput(Scanner scan, String input) {
+    public void evalInput(Scanner scan, String input) throws ResponseException {
         if (input.equals("1") || input.equalsIgnoreCase("H") || input.equalsIgnoreCase("Help")) {
             System.out.println(help());
             return;

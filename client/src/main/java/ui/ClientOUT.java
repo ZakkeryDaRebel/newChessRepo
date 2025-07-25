@@ -1,21 +1,26 @@
 package ui;
 
+import connection.ServerFacade;
+import exception.ResponseException;
 import requests.LoginRequest;
 import requests.RegisterRequest;
+import results.RegisterResult;
 
 import java.util.Scanner;
 
 public class ClientOUT {
 
-    public ClientOUT() {
+    ServerFacade serverFacade;
 
+    public ClientOUT(ServerFacade serverFacade) {
+        this.serverFacade = serverFacade;
     }
 
     public void printPrompt() {
         System.out.print(" [LOGGED OUT]>>> ");
     }
 
-    public String outEval(Scanner scan, String input) {
+    public String outEval(Scanner scan, String input) throws ResponseException {
         if (input.equals("2") || input.equalsIgnoreCase("Q") || input.equalsIgnoreCase("Quit")) {
             //Quit doesn't need to do anything when they haven't signed in yet
             return "quit";
@@ -25,10 +30,9 @@ public class ClientOUT {
             printPrompt();
             String email = scan.nextLine();
             RegisterRequest registerReq = new RegisterRequest(loginReq.username(), loginReq.password(), email);
-            //Send Register Request
-            //Get authToken from result
-            String authToken = "1234";
-            return "authToken:" + authToken;
+
+            RegisterResult result = serverFacade.register(registerReq);
+            return "authToken:" + result.authToken();
         } else if (input.equals("4") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("Login")) {
             LoginRequest loginReq = getLoginInfo(scan);
             //Send Login Request
