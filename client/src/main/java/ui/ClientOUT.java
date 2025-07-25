@@ -6,7 +6,6 @@ import requests.LoginRequest;
 import requests.RegisterRequest;
 import results.LoginResult;
 import results.RegisterResult;
-
 import java.util.Scanner;
 
 public class ClientOUT {
