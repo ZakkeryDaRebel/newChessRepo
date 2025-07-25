@@ -4,6 +4,7 @@ import connection.ServerFacade;
 import exception.ResponseException;
 import requests.LoginRequest;
 import requests.RegisterRequest;
+import results.LoginResult;
 import results.RegisterResult;
 
 import java.util.Scanner;
@@ -35,10 +36,9 @@ public class ClientOUT {
             return "authToken:" + result.authToken();
         } else if (input.equals("4") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("Login")) {
             LoginRequest loginReq = getLoginInfo(scan);
-            //Send Login Request
-            //Get authToken from result
-            String authToken = "1234";
-            return "authToken:" + authToken;
+
+            LoginResult result = serverFacade.login(loginReq);
+            return "authToken:" + result.authToken();
         } else {
             return "invalid input";
         }
