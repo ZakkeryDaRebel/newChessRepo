@@ -86,7 +86,7 @@ public class ClientREPL {
             error();
         } else if (result.equals("logout")) {
             state = UserState.OUT;
-            System.out.println(" You have successfully logged out of the CGI");
+            System.out.println("\n You have successfully logged out of the CGI");
             System.out.println(help());
         } else if (result.startsWith("Message:")) {
             printMessage(result.substring(8));
@@ -101,7 +101,7 @@ public class ClientREPL {
     }
 
     public void printError(String error) {
-        System.out.println(" " + error);
+        System.out.println("\n Sorry, we have received this error message from the CGI server\n   " + error + "\n");
     }
 
     public void printPrompt() {

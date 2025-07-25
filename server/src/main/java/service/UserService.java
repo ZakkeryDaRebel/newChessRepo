@@ -54,7 +54,7 @@ public class UserService {
             authDAO.createAuth(loginRequest.username(), authToken);
             return new LoginResult(authToken, loginRequest.username());
         } catch (DataAccessException ex) {
-            if (ex.getMessage().contains("Unauthorized")) {
+            if (ex.getMessage().contains("Unauthorized") || ex.getMessage().contains("No such user")) {
                 throw new ResponseException("Error: Unauthorized", 401);
             }
             throw new ResponseException("Error: " + ex.getMessage(), 500);
