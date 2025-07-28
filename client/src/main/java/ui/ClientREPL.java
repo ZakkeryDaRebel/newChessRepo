@@ -98,6 +98,8 @@ public class ClientREPL {
             printMessage(result.substring(8));
         } else if (result.startsWith("Error:")) {
             printError(result);
+        } else if (result.startsWith(" Here is a list of games currently in the CGI: \n")) {
+            System.out.println(result);
         }
         //"quit"
     }

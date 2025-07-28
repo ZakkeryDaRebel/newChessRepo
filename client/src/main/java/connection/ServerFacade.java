@@ -66,7 +66,9 @@ public class ServerFacade {
         builder.setHeader("Authorization", authToken);
         if (body != null) {
             builder.method(method, HttpRequest.BodyPublishers.ofString(new Gson().toJson(body)));
-            builder.setHeader("Content-Type", "aaplication/json");
+            builder.setHeader("Content-Type", "application/json");
+        } else {
+            builder.method(method, HttpRequest.BodyPublishers.noBody());
         }
         return builder.build();
     }

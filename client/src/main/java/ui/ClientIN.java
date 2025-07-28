@@ -59,11 +59,12 @@ public class ClientIN {
                 return "Message: No current games";
             }
             StringBuilder list = new StringBuilder();
+            list.append(" Here is a list of games currently in the CGI: \n");
             for (int i = 0; i < gameList.size(); i++) {
                 GameData game = gameList.get(i);
-                list.append(" " + i + ") "+ game.gameName());
-                list.append("\n   White User: " + (game.whiteUsername() == null ? "[EMPTY]" : game.whiteUsername()));
-                list.append("\n   Black User: " + (game.blackUsername() == null ? "[EMPTY]" : game.blackUsername()));
+                list.append(" " + (i + 1) + ") "+ game.gameName());
+                list.append("\n   White User: " + (game.whiteUsername() == null ? "[AVAILABLE]" : game.whiteUsername()));
+                list.append("\n   Black User: " + (game.blackUsername() == null ? "[AVAILABLE]" : game.blackUsername()));
                 list.append("\n");
             }
             return list.toString();

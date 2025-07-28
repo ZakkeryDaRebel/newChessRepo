@@ -12,7 +12,7 @@ public class Main {
             ClientREPL repl = new ClientREPL(serverURL);
             repl.run();
         } catch (Exception ex) {
-            System.out.println("Unable to start server: " + ex.getMessage());
+            System.out.println("CGI Crashed: " + ex.getMessage());
         }
     }
 }
