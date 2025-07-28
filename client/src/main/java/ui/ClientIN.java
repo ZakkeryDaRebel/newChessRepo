@@ -45,7 +45,7 @@ public class ClientIN {
             CreateGameRequest request = new CreateGameRequest(authToken, gameName);
             CreateGameResult result = serverFacade.createGame(request);
             if (result.gameID() > 0) {
-                return "Message:" + "successfully created the game (" + gameName + ")";
+                return "Message:Successfully created the game (" + gameName + ")";
             }
             return "Error: Failed to create the game (" + gameName + ")";
         } else if (input.equals("5") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("List")) {
@@ -58,16 +58,8 @@ public class ClientIN {
             if (gameList.isEmpty()) {
                 return "Message: No current games";
             }
-            StringBuilder list = new StringBuilder();
-            list.append(" Here is a list of games currently in the CGI: \n");
-            for (int i = 0; i < gameList.size(); i++) {
-                GameData game = gameList.get(i);
-                list.append(" " + (i + 1) + ") "+ game.gameName());
-                list.append("\n   White User: " + (game.whiteUsername() == null ? "[AVAILABLE]" : game.whiteUsername()));
-                list.append("\n   Black User: " + (game.blackUsername() == null ? "[AVAILABLE]" : game.blackUsername()));
-                list.append("\n");
-            }
-            return list.toString();
+
+            return formatList();
         } else if (input.equals("6") || input.equalsIgnoreCase("P") || input.equalsIgnoreCase("Play")) {
             if (isListEmpty()) {
                 return "empty list";
@@ -115,6 +107,19 @@ public class ClientIN {
         serverFacade.logout(request);
         authToken = null;
         return "success";
+    }
+
+    public String formatList() {
+        StringBuilder list = new StringBuilder();
+        list.append(" Here is a list of games currently in the CGI: \n");
+        for (int i = 0; i < gameList.size(); i++) {
+            GameData game = gameList.get(i);
+            list.append(" " + (i + 1) + ") "+ game.gameName());
+            list.append("\n   White User: " + (game.whiteUsername() == null ? "[AVAILABLE]" : game.whiteUsername()));
+            list.append("\n   Black User: " + (game.blackUsername() == null ? "[AVAILABLE]" : game.blackUsername()));
+            list.append("\n\n");
+        }
+        return list.toString();
     }
 
     public int getGameNumber(Scanner scan) throws NumberFormatException {
