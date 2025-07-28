@@ -16,7 +16,7 @@ public class ClientREPL {
     public ClientREPL(String serverURL) {
         serverFacade = new ServerFacade(serverURL);
         clientOUT = new ClientOUT(serverFacade);
-        clientIN = new ClientIN();
+        clientIN = new ClientIN(serverFacade);
         //clientPLAY = new ClientPLAY();
     }
 
@@ -57,6 +57,12 @@ public class ClientREPL {
     public void evalInput(Scanner scan, String input) throws ResponseException {
         if (input.equals("1") || input.equalsIgnoreCase("H") || input.equalsIgnoreCase("Help")) {
             System.out.println(help());
+            return;
+        }
+        if (input.equals("0~Clear")) {
+            serverFacade.clear();
+            state = UserState.OUT;
+            System.out.println("\n The CGI has been completely reset");
             return;
         }
         switch (state) {

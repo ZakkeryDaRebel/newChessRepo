@@ -1,12 +1,11 @@
 package ui;
 
 import chess.ChessGame;
+import connection.ServerFacade;
+import exception.ResponseException;
 import model.GameData;
-import requests.CreateGameRequest;
-import requests.JoinGameRequest;
-import requests.ListGamesRequest;
-import requests.LogoutRequest;
-
+import requests.*;
+import results.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -14,9 +13,10 @@ public class ClientIN {
 
     String authToken;
     ArrayList<GameData> gameList;
+    ServerFacade serverFacade;
 
-    public ClientIN() {
-
+    public ClientIN(ServerFacade serverFacade) {
+        this.serverFacade = serverFacade;
     }
 
     public void printPrompt() {
@@ -27,7 +27,7 @@ public class ClientIN {
         this.authToken = authToken;
     }
 
-    public String inEval(Scanner scan, String input) {
+    public String inEval(Scanner scan, String input) throws ResponseException {
         if (input.equals("2") || input.equalsIgnoreCase("Q") || input.equalsIgnoreCase("Quit")) {
             if (logout().equals("success")) {
                 return "quit";
@@ -43,12 +43,30 @@ public class ClientIN {
             printPrompt();
             String gameName = scan.nextLine();
             CreateGameRequest request = new CreateGameRequest(authToken, gameName);
-            //Send CreateGame Request
-            return "Message:" + "successfully created the game (" + gameName + ")";
+            CreateGameResult result = serverFacade.createGame(request);
+            if (result.gameID() > 0) {
+                return "Message:" + "successfully created the game (" + gameName + ")";
+            }
+            return "Error: Failed to create the game (" + gameName + ")";
         } else if (input.equals("5") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("List")) {
             ListGamesRequest request = new ListGamesRequest(authToken);
-            //Sen ListGames Request
-            return "Message:" + "no current games";
+            ListGamesResult result = serverFacade.listGames(request);
+            if (result.games() == null) {
+                return "Error: List games command returned no games";
+            }
+            gameList = (ArrayList<GameData>) result.games();
+            if (gameList.isEmpty()) {
+                return "Message: No current games";
+            }
+            StringBuilder list = new StringBuilder();
+            for (int i = 0; i < gameList.size(); i++) {
+                GameData game = gameList.get(i);
+                list.append(" " + i + ") "+ game.gameName());
+                list.append("\n   White User: " + (game.whiteUsername() == null ? "[EMPTY]" : game.whiteUsername()));
+                list.append("\n   Black User: " + (game.blackUsername() == null ? "[EMPTY]" : game.blackUsername()));
+                list.append("\n");
+            }
+            return list.toString();
         } else if (input.equals("6") || input.equalsIgnoreCase("P") || input.equalsIgnoreCase("Play")) {
             if (isListEmpty()) {
                 return "empty list";
@@ -91,9 +109,9 @@ public class ClientIN {
         }
     }
 
-    public String logout() {
+    public String logout() throws ResponseException {
         LogoutRequest request = new LogoutRequest(authToken);
-        //Send Logout request
+        serverFacade.logout(request);
         authToken = null;
         return "success";
     }
