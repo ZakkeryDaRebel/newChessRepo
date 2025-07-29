@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import connection.ServerFacade;
 import exception.ResponseException;
 
@@ -10,14 +11,14 @@ public class ClientREPL {
     private UserState state = UserState.OUT;
     ClientOUT clientOUT;
     ClientIN clientIN;
-    //ClientPLAY clientPLAY;
+    ClientPLAY clientPLAY;
     ServerFacade serverFacade;
 
     public ClientREPL(String serverURL) {
         serverFacade = new ServerFacade(serverURL);
         clientOUT = new ClientOUT(serverFacade);
         clientIN = new ClientIN(serverFacade);
-        //clientPLAY = new ClientPLAY();
+        clientPLAY = new ClientPLAY(serverFacade);
     }
 
     public enum UserState {
@@ -75,7 +76,7 @@ public class ClientREPL {
                 break;
             }
             case PLAY: {
-                evalResult(playEval(scan, input));
+                evalResult(clientPLAY.playEval(scan, input));
                 break;
             }
             default: error();
@@ -100,6 +101,20 @@ public class ClientREPL {
             printError(result);
         } else if (result.startsWith(" Here is a list of games currently in the CGI: \n")) {
             System.out.println(result);
+        } else if (result.startsWith("play")) {
+            state = UserState.PLAY;
+            clientPLAY.setObserver(false);
+            clientPLAY.setPlayColor(clientIN.getColor());
+            clientPLAY.setGame(clientIN.getCurrentGame());
+            System.out.println("\n You have successfully joined the game as " +
+                    (clientIN.getColor() == ChessGame.TeamColor.WHITE ? "White" : "Black"));
+
+        } else if (result.startsWith("observe")) {
+            state = UserState.PLAY;
+            clientPLAY.setObserver(true);
+            clientPLAY.setPlayColor(ChessGame.TeamColor.WHITE);
+            clientPLAY.setGame(clientIN.getCurrentGame());
+            System.out.println("\n You have succesfully joined the game as an observer");
         }
         //"quit"
     }
@@ -114,12 +129,6 @@ public class ClientREPL {
 
     public void printPrompt() {
         System.out.print(" " + stateToString() + ">>> ");
-    }
-
-
-
-    public String playEval(Scanner scan, String input) {
-        return "empty";
     }
 
     public void error() {

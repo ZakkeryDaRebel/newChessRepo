@@ -11,9 +11,12 @@ import java.util.Scanner;
 
 public class ClientIN {
 
-    String authToken;
-    ArrayList<GameData> gameList;
-    ServerFacade serverFacade;
+    private String authToken;
+    private ArrayList<GameData> gameList;
+    private ServerFacade serverFacade;
+    private GameData currentGame;
+    private ChessGame.TeamColor playColor;
+
 
     public ClientIN(ServerFacade serverFacade) {
         this.serverFacade = serverFacade;
@@ -83,8 +86,9 @@ public class ClientIN {
                 return "Error: Please enter a correct color option. Please try again";
             }
             JoinGameRequest request = new JoinGameRequest(authToken, playerColor, gameID);
-            //Send JoinGame Request
-            return "play: "+playerColor;
+            serverFacade.joinGame(request);
+            playColor = playerColor;
+            return "play";
         } else if (input.equals("7") || input.equalsIgnoreCase("O") || input.equalsIgnoreCase("Observe")) {
             if (isListEmpty()) {
                 return "empty list";
@@ -129,7 +133,8 @@ public class ClientIN {
 
         int gameNumber = Integer.parseInt(gameNumberString);
 
-        GameData gameData = gameList.get(gameNumber);
+        GameData gameData = gameList.get(gameNumber - 1);
+        currentGame = gameData;
         return gameData.gameID();
     }
 
@@ -145,5 +150,13 @@ public class ClientIN {
         } else {
             return false;
         }
+    }
+
+    public GameData getCurrentGame() {
+        return currentGame;
+    }
+
+    public ChessGame.TeamColor getColor() {
+        return playColor;
     }
 }
