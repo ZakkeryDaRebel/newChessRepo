@@ -100,7 +100,7 @@ public class ClientIN {
                 return "Error: That is not a number. Please try again";
             }
             //Send Websocket
-            return "play: observer";
+            return "observe";
         } else {
             return "invalid input";
         }
@@ -158,5 +158,10 @@ public class ClientIN {
 
     public ChessGame.TeamColor getColor() {
         return playColor;
+    }
+
+    public void resetGame() {
+        this.currentGame = null;
+        this.playColor = null;
     }
 }

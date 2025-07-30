@@ -25,24 +25,28 @@ public class ClientPLAY {
         this.isObserver = isObserver;
     }
 
+    public Boolean isObserver() {
+        return isObserver;
+    }
+
     public void setGame(GameData game) {
         gameData = game;
     }
 
     public String playEval(Scanner scan, String input) {
-        return "empty";
-
-        /*
-         Enter \"1\", \"H\", or \"Help\" to show this list of actions you can take again"
-                    + "\n" + " - Enter \"2\", \"L\", or \"Leave\" to leave the game and return to signed in state"
-                    + "\n" + " - Enter \"3\", \"I\", or \"Highlight\" to highlight the legal moves for a chess piece"
-                    + "\n" + "         (You will need to supply the row and column of the piece you want to check)"
-                    + "\n" + " - Enter \"4\", \"D\", or \"Draw\" to redraw the chess board"
-                    + "\n" + " ~ The options below are only if you are playing in the game, not observing the game"
-                    + "\n" + " - Enter \"5\", \"M\", or \"Move\" to move a chess piece"
-                    + "\n" + "         (You will need to supply the row and column of the piece you want to move,"
-                    + "\n" + "           and the row and column of where you want to move the piece to)"
-                    + "\n" + " - Enter \"6\", \"R\", or \"Resign\" to r
-         */
+        if (input.equals("2") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("Leave")) {
+            input = "leave";
+            return "leave";
+        } else if (input.equals("3") || input.equalsIgnoreCase("I") || input.equalsIgnoreCase("Highlight")) {
+            return "Message: Not implemented yet";
+        } else if (input.equals("4") || input.equalsIgnoreCase("D") || input.equalsIgnoreCase("Draw")) {
+            return "Message: Not implemented yet";
+        } else if (!isObserver && input.equals("5") || input.equalsIgnoreCase("M") || input.equalsIgnoreCase("Move")) {
+            return "Message: Not implemented yet";
+        } else if (!isObserver && input.equals("6") || input.equalsIgnoreCase("R") || input.equalsIgnoreCase("Resign")) {
+            return "Message: Not implemented yet";
+        } else {
+            return "invalid input";
+        }
     }
 }

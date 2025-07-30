@@ -108,13 +108,18 @@ public class ClientREPL {
             clientPLAY.setGame(clientIN.getCurrentGame());
             System.out.println("\n You have successfully joined the game as " +
                     (clientIN.getColor() == ChessGame.TeamColor.WHITE ? "White" : "Black"));
-
+            //Draw chessboard
         } else if (result.startsWith("observe")) {
             state = UserState.PLAY;
             clientPLAY.setObserver(true);
             clientPLAY.setPlayColor(ChessGame.TeamColor.WHITE);
             clientPLAY.setGame(clientIN.getCurrentGame());
             System.out.println("\n You have succesfully joined the game as an observer");
+            //Draw chessboard
+        } else if (result.startsWith("leave")) {
+            state = UserState.IN;
+            clientIN.resetGame();
+            System.out.println("\n You have successfully left the game");
         }
         //"quit"
     }
@@ -156,17 +161,20 @@ public class ClientREPL {
                     + "\n" + " - Enter \"7\", \"O\", or \"Observe\" to join a game as an observer"
                     + "\n" + "         (You will need to supply a game number)";
 
-            case PLAY:return " - Enter \"1\", \"H\", or \"Help\" to show this list of actions you can take again"
-                    + "\n" + " - Enter \"2\", \"L\", or \"Leave\" to leave the game and return to signed in state"
-                    + "\n" + " - Enter \"3\", \"I\", or \"Highlight\" to highlight the legal moves for a chess piece"
-                    + "\n" + "         (You will need to supply the row and column of the piece you want to check)"
-                    + "\n" + " - Enter \"4\", \"D\", or \"Draw\" to redraw the chess board"
-                    + "\n" + " ~ The options below are only if you are playing in the game, not observing the game"
-                    + "\n" + " - Enter \"5\", \"M\", or \"Move\" to move a chess piece"
-                    + "\n" + "         (You will need to supply the row and column of the piece you want to move,"
-                    + "\n" + "           and the row and column of where you want to move the piece to)"
-                    + "\n" + " - Enter \"6\", \"R\", or \"Resign\" to resign the game";
-
+            case PLAY: {
+                String output = " - Enter \"1\", \"H\", or \"Help\" to show this list of actions you can take again"
+                        + "\n" + " - Enter \"2\", \"L\", or \"Leave\" to leave the game and return to signed in state"
+                        + "\n" + " - Enter \"3\", \"I\", or \"Highlight\" to highlight the legal moves for a chess piece"
+                        + "\n" + "         (You will need to supply the row and column of the piece you want to check)"
+                        + "\n" + " - Enter \"4\", \"D\", or \"Draw\" to redraw the chess board";
+                if (!clientPLAY.isObserver()) {
+                    output += "\n" + " - Enter \"5\", \"M\", or \"Move\" to move a chess piece"
+                            + "\n" + "         (You will need to supply the row and column of the piece you want to move,"
+                            + "\n" + "           and the row and column of where you want to move the piece to)"
+                            + "\n" + " - Enter \"6\", \"R\", or \"Resign\" to resign the game";
+                }
+                return output;
+            }
             default: return  " We apologize, the CGI has last track of where you are in the system,"
                     + "\n" + " Please enter \"2\", \"Q\", or \"Quit\" to quit the CGI.";
         }
