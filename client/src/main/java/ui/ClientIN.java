@@ -42,7 +42,7 @@ public class ClientIN {
             }
             return "Error: Failed to logout";
         } else if (input.equals("4") || input.equalsIgnoreCase("C") || input.equalsIgnoreCase("Create")) {
-            System.out.println("\n Please enter the name of the game you would like to create");
+            System.out.println(" Please enter the name of the game you would like to create");
             printPrompt();
             String gameName = scan.nextLine();
             CreateGameRequest request = new CreateGameRequest(authToken, gameName);
@@ -127,7 +127,7 @@ public class ClientIN {
     }
 
     public int getGameNumber(Scanner scan) throws NumberFormatException {
-        System.out.println("\n Please enter the game number of the game you would like to play in");
+        System.out.println(" Please enter the game number of the game you would like to play in");
         printPrompt();
         String gameNumberString = scan.nextLine();
 

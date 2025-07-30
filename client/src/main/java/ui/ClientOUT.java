@@ -44,7 +44,7 @@ public class ClientOUT {
     }
 
     public LoginRequest getLoginInfo(Scanner scan) {
-        System.out.println("\n Please enter your username");
+        System.out.println(" Please enter your username");
         printPrompt();
         String username = scan.nextLine();
         System.out.println("\n Please enter your password");

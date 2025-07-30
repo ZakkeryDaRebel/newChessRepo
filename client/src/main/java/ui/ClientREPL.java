@@ -37,22 +37,23 @@ public class ClientREPL {
     }
 
     public void run() {
-        System.out.println(" Welcome to the Chess Game Interface (or CGI for short). Register or Login to start playing!");
+        System.out.println("\n Welcome to the Chess Game Interface (or CGI for short). Register or Login to start playing!");
         System.out.println(help());
 
         Scanner scan = new Scanner(System.in);
         String input = "";
-        while (!input.equals("2") && !input.equalsIgnoreCase("Q") && !input.equalsIgnoreCase("Quit")) {
+        while (!(input.equals("2") && state == UserState.OUT) && !input.equalsIgnoreCase("Q") && !input.equalsIgnoreCase("Quit")) {
             printPrompt();
             input = scan.nextLine();
             //System.out.println("User input: " + input);   //Testing purposes
+            System.out.println();
             try {
                 evalInput(scan, input);
             } catch (ResponseException ex) {
                 printError(ex.getMessage());
             }
         }
-        System.out.println("\n Thanks for playing at the CGI! Have a great rest of your day, and hope to see you soon!");
+        System.out.println(" Thanks for playing at the CGI! Have a great rest of your day, and hope to see you soon!");
     }
 
     public void evalInput(Scanner scan, String input) throws ResponseException {
@@ -63,7 +64,7 @@ public class ClientREPL {
         if (input.equals("0~Clear")) {
             serverFacade.clear();
             state = UserState.OUT;
-            System.out.println("\n The CGI has been completely reset");
+            System.out.println(" The CGI has been completely reset");
             return;
         }
         switch (state) {
@@ -109,6 +110,7 @@ public class ClientREPL {
             System.out.println("\n You have successfully joined the game as " +
                     (clientIN.getColor() == ChessGame.TeamColor.WHITE ? "White" : "Black"));
             //Draw chessboard
+            System.out.println(help());
         } else if (result.startsWith("observe")) {
             state = UserState.PLAY;
             clientPLAY.setObserver(true);
@@ -116,20 +118,24 @@ public class ClientREPL {
             clientPLAY.setGame(clientIN.getCurrentGame());
             System.out.println("\n You have succesfully joined the game as an observer");
             //Draw chessboard
+            System.out.println(help());
         } else if (result.startsWith("leave")) {
             state = UserState.IN;
             clientIN.resetGame();
             System.out.println("\n You have successfully left the game");
+            System.out.println(help());
+        } else if (result.startsWith("quit")) {
+            state = UserState.OUT;
         }
-        //"quit"
     }
 
     public void printMessage(String message) {
-        System.out.println("\n " + message);
+        System.out.println(message);
     }
 
     public void printError(String error) {
-        System.out.println("\n Sorry, we have received this error message from the CGI server\n   " + error + "\n");
+        System.out.println("\n Sorry, we have received this error message from the CGI server\n   " +
+                setRedText() + error + resetText() + "\n");
     }
 
     public void printPrompt() {
@@ -143,11 +149,15 @@ public class ClientREPL {
 
     public String help() {
         switch (state) {
-            case OUT: return " - Enter \"1\", \"H\", or \"Help\" to show this list of actions you can take again"
-                    + "\n" + " - Enter \"2\", \"Q\", or \"Quit\" to exit the Chess Game Interface (or CGI)"
-                    + "\n" + " - Enter \"3\", \"R\", or \"Register\" to create a new user"
+            case OUT: return " - Enter " + setYellowText() + "\"1\", \"H\", or \"Help\" " + resetText() +
+                                "to show this list of actions you can take again"
+                    + "\n" + " - Enter " + setYellowText() + "\"2\", \"Q\", or \"Quit\" " + resetText() +
+                                "to exit the Chess Game Interface (or CGI)"
+                    + "\n" + " - Enter " + setYellowText() + "\"3\", \"R\", or \"Register\" " + resetText() +
+                                "to create a new user"
                     + "\n" + "         (You will need to supply a username, password, and email)"
-                    + "\n" + " - Enter \"4\", \"L\", or \"Login\" to login as an existing user"
+                    + "\n" + " - Enter " + setYellowText() + "\"4\", \"L\", or \"Login\" " + resetText() +
+                                "to login as an existing user"
                     + "\n" + "         (You will need to supply a username and password)";
 
             case IN: return  " - Enter \"1\", \"H\", or \"Help\" to show this list of actions you can take again"
@@ -178,5 +188,17 @@ public class ClientREPL {
             default: return  " We apologize, the CGI has last track of where you are in the system,"
                     + "\n" + " Please enter \"2\", \"Q\", or \"Quit\" to quit the CGI.";
         }
+    }
+
+    public String setYellowText() {
+        return EscapeSequences.SET_TEXT_COLOR_YELLOW;
+    }
+
+    public String resetText() {
+        return EscapeSequences.RESET_TEXT_COLOR;
+    }
+
+    public String setRedText() {
+        return EscapeSequences.SET_TEXT_COLOR_RED;
     }
 }
