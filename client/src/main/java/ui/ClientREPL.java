@@ -9,16 +9,18 @@ import java.util.Scanner;
 public class ClientREPL {
 
     private UserState state = UserState.OUT;
-    ClientOUT clientOUT;
-    ClientIN clientIN;
-    ClientPLAY clientPLAY;
-    ServerFacade serverFacade;
+    private ServerFacade serverFacade;
+    private ClientOUT clientOUT;
+    private ClientIN clientIN;
+    private ClientPLAY clientPLAY;
+    private DrawBoard drawBoard;
 
     public ClientREPL(String serverURL) {
         serverFacade = new ServerFacade(serverURL);
         clientOUT = new ClientOUT(serverFacade);
         clientIN = new ClientIN(serverFacade);
-        clientPLAY = new ClientPLAY(serverFacade);
+        drawBoard = new DrawBoard();
+        clientPLAY = new ClientPLAY(serverFacade, drawBoard);
     }
 
     public enum UserState {
@@ -109,7 +111,7 @@ public class ClientREPL {
             clientPLAY.setGame(clientIN.getCurrentGame());
             System.out.println("\n You have successfully joined the game as " +
                     (clientIN.getColor() == ChessGame.TeamColor.WHITE ? "White" : "Black"));
-            //Draw chessboard
+            drawBoard.drawBoard(new ChessGame(), clientIN.getColor(), null);
             System.out.println(help());
         } else if (result.startsWith("observe")) {
             state = UserState.PLAY;
@@ -117,7 +119,7 @@ public class ClientREPL {
             clientPLAY.setPlayColor(ChessGame.TeamColor.WHITE);
             clientPLAY.setGame(clientIN.getCurrentGame());
             System.out.println("\n You have succesfully joined the game as an observer");
-            //Draw chessboard
+            drawBoard.drawBoard(new ChessGame(), clientIN.getColor(), null);
             System.out.println(help());
         } else if (result.startsWith("leave")) {
             state = UserState.IN;
@@ -174,14 +176,16 @@ public class ClientREPL {
             case PLAY: {
                 String output = " - Enter \"1\", \"H\", or \"Help\" to show this list of actions you can take again"
                         + "\n" + " - Enter \"2\", \"L\", or \"Leave\" to leave the game and return to signed in state"
-                        + "\n" + " - Enter \"3\", \"I\", or \"Highlight\" to highlight the legal moves for a chess piece"
+                        + "\n" + " - Enter \"3\", \"P\" or \"Piece\" to change the chess pieces to either text or icons"
+                        + "\n" + " - Enter \"4\", \"C\" or \"Color\" to change the color format of the chess board"
+                        + "\n" + " - Enter \"5\", \"I\", or \"Highlight\" to highlight the legal moves for a chess piece"
                         + "\n" + "         (You will need to supply the row and column of the piece you want to check)"
-                        + "\n" + " - Enter \"4\", \"D\", or \"Draw\" to redraw the chess board";
+                        + "\n" + " - Enter \"6\", \"D\", or \"Draw\" to redraw the chess board";
                 if (!clientPLAY.isObserver()) {
-                    output += "\n" + " - Enter \"5\", \"M\", or \"Move\" to move a chess piece"
+                    output += "\n" + " - Enter \"7\", \"M\", or \"Move\" to move a chess piece"
                             + "\n" + "         (You will need to supply the row and column of the piece you want to move,"
                             + "\n" + "           and the row and column of where you want to move the piece to)"
-                            + "\n" + " - Enter \"6\", \"R\", or \"Resign\" to resign the game";
+                            + "\n" + " - Enter \"8\", \"R\", or \"Resign\" to resign the game";
                 }
                 return output;
             }
