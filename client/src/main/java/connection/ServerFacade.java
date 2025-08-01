@@ -61,7 +61,7 @@ public class ServerFacade {
     }
 
 
-    public HttpRequest buildRequest(String method, String path, String authToken, Object body) {
+    private HttpRequest buildRequest(String method, String path, String authToken, Object body) {
         HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(serverURL + path));
         builder.setHeader("Authorization", authToken);
         if (body != null) {
@@ -73,7 +73,7 @@ public class ServerFacade {
         return builder.build();
     }
 
-    public HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
+    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception ex) {
@@ -82,7 +82,7 @@ public class ServerFacade {
         }
     }
 
-    public <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
         if (response.statusCode() != 200) {
             String jsonBody = response.body();
             if (jsonBody != null) {
