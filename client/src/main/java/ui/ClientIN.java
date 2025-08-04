@@ -72,6 +72,8 @@ public class ClientIN {
                 gameID = getGameNumber(scan);
             } catch (NumberFormatException ex) {
                 return "Error: That is not a number. Please try again";
+            } catch (IndexOutOfBoundsException ex) {
+                return "Error: That is not a valid game number. Please try again";
             }
             System.out.println(" Please enter \"W\" or \"White\" if you would like to play as White, or"
                       + "\n" + " Please enter \"B\" or \"Black\" if you would like to play as Black");
@@ -98,6 +100,8 @@ public class ClientIN {
                 gameID = getGameNumber(scan);
             } catch (NumberFormatException ex) {
                 return "Error: That is not a number. Please try again";
+            } catch (IndexOutOfBoundsException ex) {
+                return "Error: That is not a valid game number. Please try again";
             }
             //Send Websocket
             return "observe";
@@ -126,7 +130,7 @@ public class ClientIN {
         return list.toString();
     }
 
-    public int getGameNumber(Scanner scan) throws NumberFormatException {
+    public int getGameNumber(Scanner scan) throws NumberFormatException, IndexOutOfBoundsException {
         System.out.println(" Please enter the game number of the game you would like to play in");
         printPrompt();
         String gameNumberString = scan.nextLine();
