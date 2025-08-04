@@ -108,18 +108,24 @@ public class ClientREPL {
             state = UserState.PLAY;
             clientPLAY.setObserver(false);
             clientPLAY.setPlayColor(clientIN.getColor());
-            clientPLAY.setGame(clientIN.getCurrentGame());
+            clientPLAY.setGameInfo(clientIN.getCurrentGame());
             System.out.println("\n You have successfully joined the game as " +
                     (clientIN.getColor() == ChessGame.TeamColor.WHITE ? "White" : "Black"));
-            drawBoard.drawBoard(new ChessGame(), clientIN.getColor(), null);
+            //Websocket
+            ChessGame game = new ChessGame();
+            clientPLAY.setGame(game);
+            drawBoard.drawBoard(game, clientIN.getColor(), null);
             System.out.println(help());
         } else if (result.startsWith("observe")) {
             state = UserState.PLAY;
             clientPLAY.setObserver(true);
             clientPLAY.setPlayColor(ChessGame.TeamColor.WHITE);
-            clientPLAY.setGame(clientIN.getCurrentGame());
+            clientPLAY.setGameInfo(clientIN.getCurrentGame());
             System.out.println("\n You have succesfully joined the game as an observer");
-            drawBoard.drawBoard(new ChessGame(), clientIN.getColor(), null);
+            //Websocket
+            ChessGame game = new ChessGame();
+            clientPLAY.setGame(game);
+            drawBoard.drawBoard(game, clientIN.getColor(), null);
             System.out.println(help());
         } else if (result.startsWith("leave")) {
             state = UserState.IN;

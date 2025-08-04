@@ -31,8 +31,12 @@ public class ClientPLAY {
         return isObserver;
     }
 
-    public void setGame(GameData game) {
+    public void setGameInfo(GameData game) {
         gameData = game;
+    }
+
+    public void setGame(ChessGame game) {
+        gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
     }
 
     public String playEval(Scanner scan, String input) {
@@ -60,14 +64,17 @@ public class ClientPLAY {
             String choice = scan.nextLine();
             if (choice.equals("1")) {
                 drawBoard.setColorFormat(0);
+            } else if (choice.equals("2")) {
+                drawBoard.setColorFormat(1);
             } else {
                 return "invalid input";
             }
-            return "";
+            return "Message: Successfully updated the color";
         } else if (input.equals("5") || input.equalsIgnoreCase("I") || input.equalsIgnoreCase("Highlight")) {
             return "Message: Not implemented yet";
         } else if (input.equals("6") || input.equalsIgnoreCase("D") || input.equalsIgnoreCase("Draw")) {
-            return "Message: Not implemented yet";
+            drawBoard.drawBoard(gameData.game(), playColor, null);
+            return "";
         } else if (!isObserver && input.equals("7") || input.equalsIgnoreCase("M") || input.equalsIgnoreCase("Move")) {
             return "Message: Not implemented yet";
         } else if (!isObserver && input.equals("8") || input.equalsIgnoreCase("R") || input.equalsIgnoreCase("Resign")) {

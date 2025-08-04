@@ -10,7 +10,7 @@ public class DrawBoard {
 
     private boolean chessPieceFont = true;
     private int colorFormat = 0;
-    private final int COLOR_OPTIONS = 1;
+    private final int COLOR_OPTIONS = 2;
     private final String[] headers = new String[]{" ", "a", "b", "c", "d", "e", "f", "g", "h", " "};
 
     public void drawBoard(ChessGame game, ChessGame.TeamColor color, ChessPosition highlightPos) {
@@ -55,7 +55,7 @@ public class DrawBoard {
                 System.out.print(resetAll());
 
                 for (int col = 0; col < testBoard.length; col++) {
-                    System.out.print(printPiece(testBoard[row][col], (row + col) % 2 == 1));
+                    System.out.print(printPiece(testBoard[row][col], (row + col) % 2 == 1, false));
                 }
 
                 System.out.print(getBorderColor() + getBorderText());
@@ -75,26 +75,48 @@ public class DrawBoard {
     private void drawWhite(ChessGame game, ChessPosition highlightPos) {
         ArrayList<ChessMove> highlightMoves = getHighlightMoves(game, highlightPos);
         System.out.println(printCols(ChessGame.TeamColor.WHITE));
-        for (int row = 8; row >=1; row--) {
+        for (int row = 8; row >= 1; row--) {
             System.out.print(printRow(row));
             for (int col = 1; col <= 8; col++) {
-                System.out.print(printPiece(game.getBoard().getPiece(new ChessPosition(row, col)), (row + col) % 2 == 1));
+                ChessPosition checkPos = new ChessPosition(row, col);
+                ChessPiece piece = game.getBoard().getPiece(checkPos);
+                printSquare(checkPos, highlightMoves, piece);
             }
-            System.out.print(printRow(row));
-            System.out.println();
+            System.out.println(printRow(row));
         }
         System.out.println(printCols(ChessGame.TeamColor.WHITE));
     }
 
     private void drawBlack(ChessGame game, ChessPosition highlightPos) {
         ArrayList<ChessMove> highlightMoves = getHighlightMoves(game, highlightPos);
-        printCols(ChessGame.TeamColor.BLACK);
-
-        printCols(ChessGame.TeamColor.BLACK);
+        System.out.println(printCols(ChessGame.TeamColor.BLACK));
+        for (int row = 1; row <= 8; row++) {
+            System.out.print(printRow(row));
+            for (int col = 8; col >= 1; col--) {
+                ChessPosition checkPos = new ChessPosition(row, col);
+                ChessPiece piece = game.getBoard().getPiece(checkPos);
+                printSquare(checkPos, highlightMoves, piece);
+            }
+            System.out.println(printRow(row));
+        }
+        System.out.println(printCols(ChessGame.TeamColor.BLACK));
     }
 
     private ArrayList<ChessMove> getHighlightMoves(ChessGame game, ChessPosition highlightPos) {
         return (highlightPos == null ? new ArrayList<>() : (ArrayList<ChessMove>) game.validMoves(highlightPos));
+    }
+
+    private void printSquare(ChessPosition checkPos, ArrayList<ChessMove> highlightMoves, ChessPiece piece) {
+        boolean shouldHighlight = false;
+        for (int spot = 0; spot < highlightMoves.size(); spot++) {
+            if (highlightMoves.get(spot).getEndPosition().equals(checkPos)) {
+                highlightMoves.remove(spot);
+                shouldHighlight = true;
+                break;
+            }
+        }
+        boolean isLightSquare = (checkPos.getRow() + checkPos.getColumn()) % 2 == 1;
+        System.out.print(printPiece(piece, isLightSquare, shouldHighlight));
     }
 
     private String printCols(ChessGame.TeamColor color) {
@@ -125,6 +147,9 @@ public class DrawBoard {
 
     private String getBorderColor() {
         switch(colorFormat) {
+            case (1): {
+                return EscapeSequences.SET_BG_COLOR_CYAN;
+            }
             default: {
                 return EscapeSequences.SET_BG_COLOR_DARK_GREY;
             }
@@ -133,6 +158,9 @@ public class DrawBoard {
 
     private String getBorderText() {
         switch(colorFormat) {
+            case (1): {
+                return EscapeSequences.SET_TEXT_COLOR_MAGENTA;
+            }
             default: {
                 return EscapeSequences.SET_TEXT_COLOR_WHITE;
             }
@@ -141,23 +169,41 @@ public class DrawBoard {
 
     private String getBGColor(boolean isLightSquare) {
         switch(colorFormat) {
+            case (1): {
+                return (isLightSquare ? EscapeSequences.SET_BG_COLOR_LIGHT_PINK : EscapeSequences.SET_BG_COLOR_BLUE);
+            }
             default: {
                 return (isLightSquare ? EscapeSequences.SET_BG_COLOR_CREAM : EscapeSequences.SET_BG_COLOR_DARK_GREEN);
             }
         }
     }
 
+    private String getHighlightBG(boolean isLightSquare) {
+        switch(colorFormat) {
+            default: {
+                return (isLightSquare ? EscapeSequences.SET_BG_COLOR_YELLOW : EscapeSequences.SET_BG_COLOR_ORANGE);
+            }
+        }
+    }
+
     private String getTextColor(boolean isWhite) {
         switch(colorFormat) {
+            case (1): {
+                return (isWhite ? EscapeSequences.SET_TEXT_COLOR_YELLOW : EscapeSequences.SET_TEXT_COLOR_RED);
+            }
             default: {
                 return (isWhite ? EscapeSequences.SET_TEXT_COLOR_WHITE : EscapeSequences.SET_TEXT_COLOR_BLACK);
             }
         }
     }
 
-    private String printPiece(ChessPiece piece, boolean isLightSquare) {
+    private String printPiece(ChessPiece piece, boolean isLightSquare, boolean shouldHighlight) {
         String printOut = "";
-        printOut += getBGColor(isLightSquare);
+        if (!shouldHighlight) {
+            printOut += getBGColor(isLightSquare);
+        } else {
+            printOut += getHighlightBG(isLightSquare);
+        }
         if (piece == null) {
             printOut += emptySpace() + "  ";
         } else {
