@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.*;
 import exception.ResponseException;
+import handler.Handler;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import requests.*;
@@ -21,6 +22,8 @@ public class Server {
     private ClearService clearService;
     private GameService gameService;
     private UserService userService;
+
+    private Handler handler;
 
     public Server() {
         try {
@@ -42,16 +45,18 @@ public class Server {
         gameService = new GameService(authDAO, gameDAO);
         userService = new UserService(authDAO, userDAO);
 
+        handler = new Handler(clearService, gameService, userService);
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
         // Register your endpoints and exception handlers here.
-                .delete("/db", this::clearHandler)
-                .delete("/session", this::logoutHandler)
-                .get("/game", this::listGamesHandler)
-                .post("/user", this::registerHandler)
-                .post("/session", this::loginHandler)
-                .post("/game", this::createGameHandler)
-                .put("/game", this::joinGameHandler)
-                .exception(ResponseException.class, this::exceptionHandler)
+                .delete("/db", context -> {handler.clearHandler(context);})
+                .delete("/session", context -> {handler.logoutHandler(context);})
+                .get("/game", context -> {handler.listGamesHandler(context);})
+                .post("/user", context -> {handler.registerHandler(context);})
+                .post("/session", context -> {handler.loginHandler(context);})
+                .post("/game", context -> {handler.createGameHandler(context);})
+                .put("/game", context -> {handler.joinGameHandler(context);})
+                .exception(ResponseException.class, (e, context) -> {handler.exceptionHandler(e, context);})
         ;
     }
 
@@ -62,69 +67,5 @@ public class Server {
 
     public void stop() {
         javalin.stop();
-    }
-
-    //Handlers
-    private void exceptionHandler(ResponseException ex, Context ctx) {
-        ctx.status(ex.getStatus());
-        ctx.json(new Gson().toJson(Map.of("message", ex.getMessage())));
-    }
-
-    private void clearHandler(Context ctx) throws ResponseException {
-        clearService.clear();
-        successHandler(ctx, "");
-    }
-
-    private void createGameHandler(Context ctx) throws ResponseException {
-        String authToken = ctx.header("Authorization");
-        CreateGameRequest createGameRequest = new Gson().fromJson(ctx.body(), CreateGameRequest.class);
-        createGameRequest = new CreateGameRequest(authToken, createGameRequest.gameName());
-
-        CreateGameResult createGameResult = gameService.createGame(createGameRequest);
-        successHandler(ctx, new Gson().toJson(createGameResult));
-    }
-
-    private void joinGameHandler(Context ctx) throws ResponseException {
-        String authToken = ctx.header("Authorization");
-        JoinGameRequest joinGameRequest = new Gson().fromJson(ctx.body(), JoinGameRequest.class);
-        joinGameRequest = new JoinGameRequest(authToken, joinGameRequest.playerColor(), joinGameRequest.gameID());
-
-        gameService.joinGame(joinGameRequest);
-        successHandler(ctx, "");
-    }
-
-    private void listGamesHandler(Context ctx) throws ResponseException {
-        String authToken = ctx.header("Authorization");
-        ListGamesRequest listGamesRequest = new ListGamesRequest(authToken);
-
-        ListGamesResult listGamesResult = gameService.listGames(listGamesRequest);
-        successHandler(ctx, new Gson().toJson(listGamesResult));
-    }
-
-    private void loginHandler(Context ctx) throws ResponseException {
-        LoginRequest loginRequest = new Gson().fromJson(ctx.body(), LoginRequest.class);
-
-        LoginResult loginResult = userService.login(loginRequest);
-        successHandler(ctx, new Gson().toJson(loginResult));
-    }
-
-    private void logoutHandler(Context ctx) throws ResponseException {
-        String authToken = ctx.header("Authorization");
-        LogoutRequest logoutRequest = new LogoutRequest(authToken);
-
-        userService.logout(logoutRequest);
-        successHandler(ctx, "");
-    }
-
-    private void registerHandler(Context ctx) throws ResponseException {
-        RegisterRequest registerRequest = new Gson().fromJson(ctx.body(), RegisterRequest.class);
-
-        RegisterResult registerResult = userService.register(registerRequest);
-        successHandler(ctx, new Gson().toJson(registerResult));
-    }
-
-    private void successHandler(Context ctx, String json) {
-        ctx.status(200);
-        ctx.json(json);
     }
 }
