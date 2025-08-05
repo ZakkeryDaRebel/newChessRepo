@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import connection.ServerFacade;
 import model.GameData;
 
@@ -41,7 +42,6 @@ public class ClientPLAY {
 
     public String playEval(Scanner scan, String input) {
         if (input.equals("2") || input.equalsIgnoreCase("L") || input.equalsIgnoreCase("Leave")) {
-            input = "leave";
             return "leave";
         } else if (input.equals("3")) {
             System.out.println(" Would you like your chess pieces to look like the chess piece icons, or use a text letter?");
@@ -71,6 +71,29 @@ public class ClientPLAY {
             }
             return "Message: Successfully updated the color";
         } else if (input.equals("5") || input.equalsIgnoreCase("I") || input.equalsIgnoreCase("Highlight")) {
+            System.out.println(" What piece would you like to highlight?");
+            System.out.println(" ~ Please input the column (a - h)");
+            printPrompt();
+            String choice = scan.nextLine();
+            int col = getCol(choice);
+            if (col == -1) {
+                return "invalid input";
+            }
+            System.out.println(" ~ Please input the row (1-8)");
+            printPrompt();
+            choice = scan.nextLine();
+            int row;
+            try {
+                row = Integer.parseInt(choice);
+                if (row < 1 || row > 8) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException ex) {
+                return "invalid input";
+            }
+            ChessPosition highlightPos = new ChessPosition(row, col);
+            drawBoard.drawBoard(gameData.game(), playColor, highlightPos);
+
             return "Message: Not implemented yet";
         } else if (input.equals("6") || input.equalsIgnoreCase("D") || input.equalsIgnoreCase("Draw")) {
             drawBoard.drawBoard(gameData.game(), playColor, null);
@@ -86,5 +109,27 @@ public class ClientPLAY {
 
     public void printPrompt() {
         System.out.print(" [PLAYING GAME]>>> ");
+    }
+
+    public int getCol(String choice) {
+        if (choice.equalsIgnoreCase("a")) {
+            return 1;
+        } else if (choice.equalsIgnoreCase("b")) {
+            return 2;
+        } else if (choice.equalsIgnoreCase("c")) {
+            return 3;
+        } else if (choice.equalsIgnoreCase("d")) {
+            return 4;
+        } else if (choice.equalsIgnoreCase("e")) {
+            return 5;
+        } else if (choice.equalsIgnoreCase("f")) {
+            return 6;
+        } else if (choice.equalsIgnoreCase("g")) {
+            return 7;
+        } else if (choice.equalsIgnoreCase("h")) {
+            return 8;
+        } else {
+            return -1;
+        }
     }
 }

@@ -103,7 +103,16 @@ public class DrawBoard {
     }
 
     private ArrayList<ChessMove> getHighlightMoves(ChessGame game, ChessPosition highlightPos) {
-        return (highlightPos == null ? new ArrayList<>() : (ArrayList<ChessMove>) game.validMoves(highlightPos));
+        if (highlightPos == null) {
+            return new ArrayList<>();
+        } else {
+            ArrayList<ChessMove> validMoves = (ArrayList<ChessMove>) game.validMoves(highlightPos);
+            if (validMoves == null) {
+                validMoves = new ArrayList<>();
+            }
+            validMoves.add(new ChessMove(highlightPos, highlightPos, null));
+            return validMoves;
+        }
     }
 
     private void printSquare(ChessPosition checkPos, ArrayList<ChessMove> highlightMoves, ChessPiece piece) {
