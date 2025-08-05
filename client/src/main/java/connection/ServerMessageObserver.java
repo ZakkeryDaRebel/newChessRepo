@@ -1,6 +1,6 @@
 package connection;
 
-import messages.ServerMessage;
+import websocket.messages.ServerMessage;
 
 public interface ServerMessageObserver {
     public void notify(ServerMessage message);
