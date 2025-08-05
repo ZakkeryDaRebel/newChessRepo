@@ -2,11 +2,15 @@ package ui;
 
 import chess.ChessGame;
 import connection.ServerFacade;
+import connection.ServerMessageObserver;
 import exception.ResponseException;
-
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 import java.util.Scanner;
 
-public class ClientREPL {
+public class ClientREPL implements ServerMessageObserver {
 
     private UserState state = UserState.OUT;
     private ServerFacade serverFacade;
@@ -16,7 +20,7 @@ public class ClientREPL {
     private DrawBoard drawBoard;
 
     public ClientREPL(String serverURL) {
-        serverFacade = new ServerFacade(serverURL);
+        serverFacade = new ServerFacade(serverURL, this);
         clientOUT = new ClientOUT(serverFacade);
         clientIN = new ClientIN(serverFacade);
         drawBoard = new DrawBoard();
@@ -134,6 +138,18 @@ public class ClientREPL {
             System.out.println(help());
         } else if (result.startsWith("quit")) {
             state = UserState.OUT;
+        }
+    }
+
+    public void notify(ServerMessage message) {
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+            printError(((ErrorMessage) message).getErrorMessage());
+        } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+            printMessage(((NotificationMessage) message).getMessage());
+        } else {
+            LoadGameMessage lg = (LoadGameMessage) message;
+            clientPLAY.setGame(lg.getGame());
+            drawBoard.drawBoard(lg.getGame(), clientIN.getColor(), null);
         }
     }
 
