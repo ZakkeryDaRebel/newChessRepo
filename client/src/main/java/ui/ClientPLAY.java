@@ -9,11 +9,11 @@ import java.util.Scanner;
 
 public class ClientPLAY {
 
-    private ServerFacade serverFacade;
+    private final ServerFacade serverFacade;
     private GameData gameData;
     private ChessGame.TeamColor playColor;
     private boolean isObserver;
-    private DrawBoard drawBoard;
+    private final DrawBoard drawBoard;
 
     public ClientPLAY(ServerFacade serverFacade, DrawBoard drawBoard) {
         this.serverFacade = serverFacade;
@@ -45,8 +45,8 @@ public class ClientPLAY {
             return "leave";
         } else if (input.equals("3")) {
             System.out.println(" Would you like your chess pieces to look like the chess piece icons, or use a text letter?");
-            System.out.println(" - Enter \"1\", \"P\", or \"Piece\" if you would like your chess pieces to look like \'" + EscapeSequences.BLACK_QUEEN + "\'");
-            System.out.println(" - Enter \"2\", \"T\", or \"Text\" if you would like your chess pieces to look like \'Q\'");
+            System.out.println(" - Enter \"1\", \"P\", or \"Piece\" if you would like your chess pieces to look like '" + EscapeSequences.BLACK_QUEEN + "'");
+            System.out.println(" - Enter \"2\", \"T\", or \"Text\" if you would like your chess pieces to look like 'Q'");
             printPrompt();
             String choice = scan.nextLine();
             if (choice.equals("1") || choice.equalsIgnoreCase("P") || choice.equalsIgnoreCase("Piece")) {
