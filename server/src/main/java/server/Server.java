@@ -1,15 +1,12 @@
 package server;
 
-import com.google.gson.Gson;
 import dataaccess.*;
 import exception.ResponseException;
 import handler.Handler;
+import websocket.ConnectionManager;
+import websocket.WebSocketHandler;
 import io.javalin.Javalin;
-import io.javalin.http.Context;
-import requests.*;
-import results.*;
 import service.*;
-import java.util.Map;
 
 public class Server {
 
@@ -24,6 +21,8 @@ public class Server {
     private UserService userService;
 
     private Handler handler;
+    private ConnectionManager connectionManager;
+    private WebSocketHandler websocketHandler;
 
     public Server() {
         try {
@@ -46,6 +45,8 @@ public class Server {
         userService = new UserService(authDAO, userDAO);
 
         handler = new Handler(clearService, gameService, userService);
+        connectionManager = new ConnectionManager();
+        websocketHandler = new WebSocketHandler(authDAO, gameDAO, connectionManager);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
         // Register your endpoints and exception handlers here.
