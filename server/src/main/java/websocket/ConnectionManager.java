@@ -1,7 +1,9 @@
 package websocket;
 
+import com.google.gson.Gson;
 import exception.ResponseException;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.ServerMessage;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +34,40 @@ public class ConnectionManager {
         try {
             ArrayList<Connection> connectionList = connectionMap.get(gameID);
             connectionList.remove(session);
+        } catch (Exception ex) {
+            throw new ResponseException(ex.getMessage(), 500);
+        }
+    }
+
+    public enum MessageType {
+        ROOT,
+        NOT_ROOT,
+        EVERYONE
+    }
+
+    public void messageDelivery(MessageType messageType, int gameID, Session rootClient, ServerMessage serverMessage) throws ResponseException {
+        ArrayList<Connection> connectionList = connectionMap.get(gameID);
+        switch (messageType) {
+            case ROOT: {
+                sendMessage(rootClient, serverMessage);
+                return;
+            } case NOT_ROOT: {
+                for (Connection connection : connectionList) {
+                    if (!rootClient.equals(connection.session())) {
+                        sendMessage(connection.session(), serverMessage);
+                    }
+                }
+            } case EVERYONE: {
+                for (Connection connection : connectionList) {
+                    sendMessage(connection.session(), serverMessage);
+                }
+            }
+        }
+    }
+
+    public void sendMessage(Session session, ServerMessage serverMessage) throws ResponseException {
+        try {
+            session.getRemote().sendString(new Gson().toJson(serverMessage));
         } catch (Exception ex) {
             throw new ResponseException(ex.getMessage(), 500);
         }
