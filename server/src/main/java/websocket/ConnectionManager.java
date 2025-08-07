@@ -57,10 +57,12 @@ public class ConnectionManager {
                         sendMessage(connection.session(), serverMessage);
                     }
                 }
+                return;
             } case EVERYONE: {
                 for (Connection connection : connectionList) {
                     sendMessage(connection.session(), serverMessage);
                 }
+                return;
             }
         }
     }
