@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
 import io.javalin.websocket.*;
-import websocket.commands.MakeMoveCommand;
-import websocket.commands.UserGameCommand;
+import model.AuthData;
+import model.GameData;
+import websocket.commands.*;
+import websocket.messages.*;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -29,13 +31,33 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleMessage(WsMessageContext ctx) {
         try {
             UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+            AuthData auth = authDAO.getAuth(userGameCommand.getAuthToken());
+            if (auth == null) {
+                ErrorMessage newError = new ErrorMessage("Error: Unauthorized");
+                connectionManager.messageDelivery(ConnectionManager.MessageType.ROOT, 1, ctx.session, newError);
+                return;
+            }
+            GameData game = gameDAO.getGame(userGameCommand.getGameID());
+            if (game == null) {
+                ErrorMessage newError = new ErrorMessage("Error: Invalid Game");
+                connectionManager.messageDelivery(ConnectionManager.MessageType.ROOT, 1, ctx.session, newError);
+                return;
+            }
             switch (userGameCommand.getCommandType()) {
                 case CONNECT: {
-                    //Add to connection manager
-                    //Get the game
-                    //Create the message "username joined the game as W/B/O"
-                    //Send a LoadGameMessage to the root client
-                    //Send a NotificationMessage to all but the root client
+                    connectionManager.add(userGameCommand.getGameID(), ctx.session, auth.username());
+                    String message = auth.username() + " has joined the game as ";
+                    if (auth.username().equals(game.whiteUsername())) {
+                        message += "the White player";
+                    } else if (auth.username().equals(game.blackUsername())) {
+                        message += "the Black player";
+                    } else {
+                        message += "an Observer";
+                    }
+                    LoadGameMessage loadMessage = new LoadGameMessage(game);
+                    NotificationMessage notification = new NotificationMessage(message);
+                    connectionManager.messageDelivery(ConnectionManager.MessageType.ROOT, 1, ctx.session, loadMessage);
+                    connectionManager.messageDelivery(ConnectionManager.MessageType.NOT_ROOT, userGameCommand.getGameID(), ctx.session, notification);
                 } case LEAVE: {
                     //Remove from the connection manager
                     //Get the game
