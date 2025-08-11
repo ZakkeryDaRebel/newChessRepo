@@ -4,6 +4,8 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import exception.ResponseException;
+
 import java.util.ArrayList;
 
 public class DrawBoard {
@@ -13,7 +15,7 @@ public class DrawBoard {
     private final int COLOR_OPTIONS = 2;
     private final String[] headers = new String[]{" ", "a", "b", "c", "d", "e", "f", "g", "h", " "};
 
-    public void drawBoard(ChessGame game, ChessGame.TeamColor color, ChessPosition highlightPos) {
+    public void drawBoard(ChessGame game, ChessGame.TeamColor color, ChessPosition highlightPos) throws ResponseException {
         if (color == ChessGame.TeamColor.BLACK) {
             drawBlack(game, highlightPos);
         } else {
@@ -72,7 +74,7 @@ public class DrawBoard {
         colorFormat = originalFormat;
     }
 
-    private void drawWhite(ChessGame game, ChessPosition highlightPos) {
+    private void drawWhite(ChessGame game, ChessPosition highlightPos) throws ResponseException {
         ArrayList<ChessMove> highlightMoves = getHighlightMoves(game, highlightPos);
         System.out.println(printCols(ChessGame.TeamColor.WHITE));
         for (int row = 8; row >= 1; row--) {
@@ -87,7 +89,7 @@ public class DrawBoard {
         System.out.println(printCols(ChessGame.TeamColor.WHITE));
     }
 
-    private void drawBlack(ChessGame game, ChessPosition highlightPos) {
+    private void drawBlack(ChessGame game, ChessPosition highlightPos) throws ResponseException {
         ArrayList<ChessMove> highlightMoves = getHighlightMoves(game, highlightPos);
         System.out.println(printCols(ChessGame.TeamColor.BLACK));
         for (int row = 1; row <= 8; row++) {
@@ -102,10 +104,13 @@ public class DrawBoard {
         System.out.println(printCols(ChessGame.TeamColor.BLACK));
     }
 
-    private ArrayList<ChessMove> getHighlightMoves(ChessGame game, ChessPosition highlightPos) {
+    private ArrayList<ChessMove> getHighlightMoves(ChessGame game, ChessPosition highlightPos) throws ResponseException {
         if (highlightPos == null) {
             return new ArrayList<>();
         } else {
+            if (game.getBoard().getPiece(highlightPos) == null) {
+                throw new ResponseException("Error: No piece at that spot", 0);
+            }
             ArrayList<ChessMove> validMoves = (ArrayList<ChessMove>) game.validMoves(highlightPos);
             if (validMoves == null) {
                 validMoves = new ArrayList<>();

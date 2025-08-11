@@ -90,7 +90,7 @@ public class ClientREPL implements ServerMessageObserver {
         }
     }
 
-    public void evalResult(String result) {
+    public void evalResult(String result) throws ResponseException {
         if (result.startsWith("authToken:")) {
             state = UserState.IN;
             clientIN.updateAuthToken(result.substring(10));
@@ -148,8 +148,12 @@ public class ClientREPL implements ServerMessageObserver {
             printMessage(((NotificationMessage) message).getMessage());
         } else {
             LoadGameMessage lg = (LoadGameMessage) message;
-            clientPLAY.setGame(lg.getGame());
-            drawBoard.drawBoard(lg.getGame(), clientIN.getColor(), null);
+            clientPLAY.setGameInfo(lg.getGame());
+            try {
+                drawBoard.drawBoard(lg.getGame().game(), clientIN.getColor(), null);
+            } catch (ResponseException ex) {
+                printError(ex.getMessage());
+            }
         }
     }
 
