@@ -6,6 +6,7 @@ import dataaccess.GameDAO;
 import io.javalin.websocket.*;
 import model.AuthData;
 import model.GameData;
+import org.jetbrains.annotations.NotNull;
 import websocket.commands.*;
 import websocket.messages.*;
 
@@ -28,7 +29,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) {
+    public void handleMessage(@NotNull WsMessageContext ctx) {
         try {
             UserGameCommand userGameCommand = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             AuthData auth = authDAO.getAuth(userGameCommand.getAuthToken());
