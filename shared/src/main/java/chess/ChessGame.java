@@ -292,4 +292,8 @@ public class ChessGame {
         }
         return null;
     }
+
+    public boolean isGameOver() {
+        return isGameOver;
+    }
 }
