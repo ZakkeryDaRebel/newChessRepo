@@ -50,6 +50,11 @@ public class Server {
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
         // Register your endpoints and exception handlers here.
+                .ws("/ws", ws -> {
+                    ws.onConnect(websocketHandler);
+                    ws.onClose(websocketHandler);
+                    ws.onMessage(websocketHandler);
+                })
                 .delete("/db", context -> {handler.clearHandler(context);})
                 .delete("/session", context -> {handler.logoutHandler(context);})
                 .get("/game", context -> {handler.listGamesHandler(context);})
