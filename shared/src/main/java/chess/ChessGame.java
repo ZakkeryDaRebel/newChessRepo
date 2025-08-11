@@ -15,11 +15,13 @@ import java.util.Collection;
  */
 public class ChessGame {
 
-    TeamColor teamTurn;
-    ChessBoard board;
-    EnPassantCalculator enPassantCal;
-    CastleCalculator castleCal;
-    AttackKingCalculator attackCal;
+    private TeamColor teamTurn;
+    private ChessBoard board;
+    private EnPassantCalculator enPassantCal;
+    private CastleCalculator castleCal;
+    private AttackKingCalculator attackCal;
+    private boolean isGameOver;
+
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
@@ -28,6 +30,7 @@ public class ChessGame {
         enPassantCal = new EnPassantCalculator();
         castleCal = new CastleCalculator();
         attackCal = new AttackKingCalculator();
+        isGameOver = false;
     }
 
     /**
@@ -182,6 +185,11 @@ public class ChessGame {
             teamTurn = TeamColor.BLACK;
         } else {
             teamTurn = TeamColor.WHITE;
+        }
+
+        //Check to see if game is over
+        if (isInCheckmate(teamTurn) || isInStalemate(teamTurn)) {
+            isGameOver = true;
         }
     }
 
