@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Arrays;
 import java.util.Objects;
+import chess.ChessPiece.PieceType;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -53,7 +54,7 @@ public class ChessBoard implements Cloneable {
         ChessPiece.PieceType knight = ChessPiece.PieceType.KNIGHT;
         ChessPiece.PieceType pawn = ChessPiece.PieceType.PAWN;
 
-        board[0][0] = new ChessPiece(white, rook);
+        board[0][0] = new ChessPiece(white, PieceType.ROOK);
         board[0][1] = new ChessPiece(white, knight);
         board[0][2] = new ChessPiece(white, bishop);
         board[0][3] = new ChessPiece(white, queen);

@@ -135,7 +135,7 @@ public class ClientPLAY {
         printPrompt();
         String choice = scan.nextLine();
         ChessMove test = new ChessMove(null, null, null);
-        int col = test.getColNum(choice);
+        int col = getColNum(choice);
         if (col == -1) {
             throw new ResponseException("invalid input", 0);
         }
@@ -152,6 +152,28 @@ public class ClientPLAY {
             throw new ResponseException("invalid input", 0);
         }
         return new ChessPosition(row, col);
+    }
+
+    public int getColNum(String choice) {
+        if (choice.equalsIgnoreCase("a")) {
+            return 1;
+        } else if (choice.equalsIgnoreCase("b")) {
+            return 2;
+        } else if (choice.equalsIgnoreCase("c")) {
+            return 3;
+        } else if (choice.equalsIgnoreCase("d")) {
+            return 4;
+        } else if (choice.equalsIgnoreCase("e")) {
+            return 5;
+        } else if (choice.equalsIgnoreCase("f")) {
+            return 6;
+        } else if (choice.equalsIgnoreCase("g")) {
+            return 7;
+        } else if (choice.equalsIgnoreCase("h")) {
+            return 8;
+        } else {
+            return -1;
+        }
     }
 
     public ChessPiece.PieceType getPromotion(Scanner scan, ChessPosition startPos, ChessPosition endPos) throws ResponseException {
